@@ -1,5 +1,16 @@
 jQuery(document).ready(function( $ ) {
 
+  $('#kategorije_auta').on('change', function(ev){
+    var valueOfCategory = ev.target.value;
+    $.ajax('/search/' + valueOfCategory)
+        .done(function(response){
+            console.log(response);
+            $('.about-cols').html(response);
+        })
+        .fail(function(error){
+            console.log(error);
+        });
+  });
   // Back to top button
   $(window).scroll(function() {
     if ($(this).scrollTop() > 100) {

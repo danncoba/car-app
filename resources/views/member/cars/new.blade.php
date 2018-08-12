@@ -56,6 +56,32 @@
                             </div>
                         </div>
                         <div class="form-group row">
+                            <label for="godiste" class="col-sm-4 col-form-label text-md-right">{{ __('Godiste') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="godiste" type="number" class="form-control{{ $errors->has('godiste') ? ' is-invalid' : '' }}" name="godiste" value="{{ old('godiste') }}" required autofocus>
+
+                                @if ($errors->has('godiste'))
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $errors->first('godiste') }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="opis" class="col-sm-4 col-form-label text-md-right">{{ __('Opis') }}</label>
+
+                            <div class="col-md-6">
+                                <textarea id="opis" class="form-control{{ $errors->has('opis') ? ' is-invalid' : '' }}" name="opis" value="{{ old('opis') }}" autofocus></textarea>
+
+                                @if ($errors->has('opis'))
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $errors->first('opis') }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="form-group row">
                             <label for="kilometraza" class="col-sm-4 col-form-label text-md-right">{{ __('Kilometraza') }}</label>
 
                             <div class="col-md-6">

@@ -8,12 +8,20 @@
                 <h3>Pretrazite auta</h3>
                 <p>
                     Pretrazite auto koje vam odgovara
+                    <br>
+                    <br>
+                    <select name="kategorije_auta" id="kategorije_auta">
+                        <option value="">Izaberite marku automobile</option>
+                        @foreach($categories as $category)
+                            <option value="{{$category->id}}">{{$category->ime}}</option>
+                        @endforeach
+                    </select>
                 </p>
             </header>
 
             <div class="row about-cols">
                 @foreach($cars as $car)
-                    <div class="col-md-4 wow fadeInUp">
+                    <div class="col-md-4 wow">
                         <div class="about-col">
                             <div class="img">
                                 <img src="/uploads/logos/{{$car->slika}}" alt="" class="img-fluid">

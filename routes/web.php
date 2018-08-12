@@ -2,6 +2,8 @@
 
 Route::get('/', 'WelcomeController@index')->name('root');
 
+Route::get('/search/{category}', 'WelcomeController@search')->name('search_cars');
+
 // Authentication Routes...
 Route::get('/login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('/login', 'Auth\LoginController@login');
@@ -29,4 +31,3 @@ Route::post('/member/cars', 'CarsController@create')->name('member_create_car');
 Route::post('/member/cars/{car}/delete', 'CarsController@delete')->name('member_delete_car');
 
 Route::post('/dashboard/cars/approve/{car}', 'AdminCarsController@approve')->name('approve_car');
-

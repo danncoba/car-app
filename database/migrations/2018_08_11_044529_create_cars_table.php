@@ -15,12 +15,15 @@ class CreateCarsTable extends Migration
     {
         Schema::create('cars', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('ime')->nullable(false);
+            $table->string('ime')->nullable(false)->unique(true);
             $table->decimal('cena')->nullable(false);
+            $table->integer('godiste')->nullable(false);
+            $table->text('opis')->nullable(true);
             $table->bigInteger('kilometraza')->nullable(true);
-            $table->string('slika')->nullable(true);
+            $table->string('slika')->nullable(false)->default('avatar.jpg');
             $table->boolean('odobren')->default(false);
             $table->integer('category_id');
+            $table->integer('user_id');
             $table->timestamps();
         });
     }

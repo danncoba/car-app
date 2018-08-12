@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Car;
 use App\Category;
+use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CarsController extends Controller
 {
@@ -16,7 +18,7 @@ class CarsController extends Controller
 
     public function index()
     {
-        $cars = Car::all();
+        $cars = Auth::user()->cars;
         return view('member.cars.index', compact('cars'));
     }
 
@@ -38,30 +40,28 @@ class CarsController extends Controller
         $this->validate($request, [
             'ime' => 'required|string|max:255|min:3',
             'kilometraza' => 'required|numeric',
+            'godiste' => 'required|numeric',
             'cena' => 'required|numeric',
             'slika' => 'file|max:1024',
             'category_id' => 'required|numeric',
         ]);
         $ime = $request->get('ime');
         $cena = $request->get('cena');
+        $godiste = $request->get('godiste');
+        $opis = $request->get('opis');
         $kilometraza = $request->get('kilometraza');
-        $slika = 'avatar.jpg';
-        if($request->hasfile('slika'))
-        {
-            $file = $request->file('slika');
-            $extension = $file->getClientOriginalExtension(); // getting image extension
-            $filename =time().'.'.$extension;
-            $file->move('uploads/logos/', $filename);
-            $slika = $filename;
-        }
+        $slika = $this->uploadFile($request);
 
         $category_id = $request->get('category_id');
-        Car::create([
+        $car = Car::create([
             'ime' => $ime,
             'cena' => $cena,
             'kilometraza' => $kilometraza,
+            'godiste' => $godiste,
+            'opis' => $opis,
             'slika' => $slika,
             'category_id' => $category_id,
+            'user_id' => Auth::user()->id,
         ]);
         return redirect()->route('member_cars');
     }
@@ -75,12 +75,16 @@ class CarsController extends Controller
             'slika' => 'file|max:1024',
             'category_id' => 'required|numeric',
         ]);
-        $cat = Car::find($c);
-        $cat->ime = $request->get('ime');
-        $cat->cena = $request->get('cena');
-        $cat->kilometraza = $request->get('kilometraza');
-        $cat->category_id = $request->get('category_id');
-        $cat->save();
+        $car = Car::find($c);
+        $car->ime = $request->get('ime');
+        $car->cena = $request->get('cena');
+        $car->godiste = $request->get('godiste');
+        $car->opis = $request->get('opis');
+        $car->kilometraza = $request->get('kilometraza');
+        $car->slika = $this->updateUploadFile($request, $car->slika);
+        $car->category_id = $request->get('category_id');
+
+        $car->save();
         return redirect()->route('member_cars');
     }
 
@@ -89,5 +93,31 @@ class CarsController extends Controller
         $carDeleting = Car::find($car);
         $carDeleting->delete();
         return redirect()->route('categories');
+    }
+
+    private function uploadFile($request)
+    {
+        if($request->hasfile('slika'))
+        {
+            $file = $request->file('slika');
+            $extension = $file->getClientOriginalExtension(); // getting image extension
+            $filename =time().'.'.$extension;
+            $file->move('uploads/logos/', $filename);
+            return $filename;
+        }
+        return 'avatar.jpg';
+    }
+
+    private function updateUploadFile($request, $picture)
+    {
+        if($request->hasfile('slika'))
+        {
+            $file = $request->file('slika');
+            $extension = $file->getClientOriginalExtension(); // getting image extension
+            $filename =time().'.'.$extension;
+            $file->move('uploads/logos/', $filename);
+            return $filename;
+        }
+        return $picture;
     }
 }
