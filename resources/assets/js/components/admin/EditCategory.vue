@@ -9,6 +9,8 @@
             <shared-links></shared-links>
             <div class="row">
                 <div class="col-md-12">
+                    <error-messages></error-messages>
+                    <div v-if="success" class="alert alert-success">{{successMessage}}</div>
                     <form method="POST" action="" v-on:submit="updateCategory($event)">
                         <div class="form-group row">
                             <label for="email" class="col-sm-4 col-form-label text-md-right">Ime Kategorije</label>
@@ -31,14 +33,19 @@
 </template>
 <script>
 import SharedLinks from './SharedLinks.vue'
+import ErrorHandler from '../../errorHandler'
+import ErrorMessages from '../shared/ErrorMessages';
 export default {
     name: 'EditCategory',
     components: {
-        'shared-links': SharedLinks
+        'shared-links': SharedLinks,
+        'error-messages': ErrorMessages
     },
     data: function(){
         return{
-            category: {}
+            category: {},
+            success: false,
+            successMessage: ''
         }
     },
     created() {
@@ -47,13 +54,13 @@ export default {
             method: 'GET',
             url: `/api/dashboard/categories/${this.$route.params.id}`,
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                'X-CSRF-TOKEN': Laravel.csrfToken
             },
             success: function(response) {
                 self.category = response
             },
             error: function(err){
-                console.log('Error', err);
+                ErrorHandler.displayErrors(err);
             }
         });
     },
@@ -67,14 +74,15 @@ export default {
                 method: 'POST',
                 url: `/api/dashboard/categories/${self.category.id}/update`,
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': Laravel.csrfToken
                 },
                 data: data,
                 success: function(response) {
-                    console.log(response);
+                    self.success = true
+                    self.successMessage = 'Successfully updated category'
                 },
                 error: function(err){
-                    console.log('Error', err);
+                    ErrorHandler.displayErrors(err);
                 }
             });
         }

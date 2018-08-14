@@ -17,13 +17,14 @@
                             <th>Akcije</th>
                             </thead>
                             <tbody>
-                                <tr v-for="car in cars">
+                                <tr v-for="(car, index) in cars">
                                     <td><img width="50" height="50" :src="car.slika" /></td>
                                     <td>{{car.ime}}</td>
                                     <td>{{car.kilometraza}}</td>
                                     <td>{{car.cena}}</td>
                                     <td width="200">
-                                        <a v-if="car.odobren !== 1" href="#" @click="approveCategory($event, car.id)">Odobri</a>
+                                        <a v-if="car.odobren !== 1" href="#" @click="approveCategory($event, car.id, index)">Odobri</a>
+                                        <span v-if="car.odobren" style="color: green;">Odobren</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -68,17 +69,17 @@
             });
         },
         methods: {
-            approveCategory: function(ev, id){
+            approveCategory: function(ev, id, index){
                 ev.preventDefault();
                 console.log("Odobri auto sa id: ", id);
                 $.ajax({
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': Laravel.csrfToken
                     },
                     url: `dashboard/cars/approve/${id}`,
                     success: function(response) {
-                        console.log("Response: ", response);
+                        self.cars[index].odobren = 1;
                     },
                     error: function(err){
                         console.log("Error odobravanja, ", err);

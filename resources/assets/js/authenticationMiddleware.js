@@ -4,10 +4,15 @@ export default class Auth {
             method: 'GET',
             url: '/api/user',
             success: function(response) {
-                if (response.id !== undefined) {
-                    success(response)
+                Laravel.csrfToken = response.token
+                if (response.user !== null) {
+                    if (response.user.id !== undefined) {
+                        success(response.user)
+                    } else {
+                        error("not logged in");
+                    }
                 } else {
-                    error("not logged in");
+                    error("not logged in")
                 }
             },
             error: function(err) {
@@ -19,6 +24,7 @@ export default class Auth {
     isCurrentAllowedAdmin(to, from, next) {
         Auth.isAllowed((resp) => {
             if (resp.type === 'admin') {
+                Event.vue.$emit('navigationUpdated', { type: 'admin' })
                 next()
             } else {
                 next({ path: '/login' });
@@ -31,6 +37,7 @@ export default class Auth {
     isCurrentAllowedMember(to, from, next) {
         Auth.isAllowed((resp) => {
             if (resp.type === 'member') {
+                Event.vue.$emit('navigationUpdated', { type: 'member' })
                 next()
             } else {
                 next({ path: '/login' });
@@ -39,5 +46,23 @@ export default class Auth {
         }, (err) => {
             next({ path: '/login' })
         })
+    }
+
+    notAuthRoute(to, from, next) {
+        Auth.isAllowed((resp) => {
+            if (resp.type === 'admin') {
+                Event.vue.$emit('navigationUpdated', { type: 'admin' })
+                next()
+            } else if (resp.type === 'member') {
+                Event.vue.$emit('navigationUpdated', { type: 'member' })
+                next()
+            } else {
+                Event.vue.$emit('navigationUpdated', { type: 'ordinary' });
+                next()
+            }
+        }, (err) => {
+            Event.vue.$emit('navigationUpdated', { type: 'ordinary' });
+            next()
+        });
     }
 }

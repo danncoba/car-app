@@ -9,6 +9,6 @@ class UserController extends Controller
 {
     public function user(Request $request)
     {
-        return Auth::user();
+        return response()->json(['user' => Auth::user(), 'token' => csrf_token()]);
     }
 }

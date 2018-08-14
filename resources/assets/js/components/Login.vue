@@ -9,9 +9,7 @@
                             <div class="alert alert-success" v-if="succesfullLogin">
                                 {{message}}
                             </div>
-                            <div class="alert alert-danger" v-if="errorLogin">
-                                {{message}}
-                            </div>
+                            <error-messages></error-messages>
                             <form method="POST" action="" aria-label="Login">
                                 <div class="form-group row">
                                     <label for="email" class="col-sm-4 col-form-label text-md-right">E-Mail Address</label>
@@ -50,8 +48,13 @@
 </template>
 
 <script>
+    import ErrorHandler from '../errorHandler'
+    import ErrorMessages from './shared/ErrorMessages';
     export default {
         name: "Login",
+        components: {
+            'error-messages': ErrorMessages
+        },
         data: function(){
             return{
                 email: '',
@@ -64,14 +67,9 @@
         },
         methods: {
             loginUser: function(ev) {
-                console.log(ev);
-                console.log('Event has been done')
                 ev.preventDefault();
                 var self = this;
-                console.log("Meta title", $('meta[name="csrf-token"]').attr('content'))
                 self.buttonDisabled = true;
-                console.log(this.email);
-                console.log(this.password);
                 var data = {
                     email: this.email,
                     password: this.password
@@ -80,10 +78,10 @@
                     method: 'POST',
                     url: 'api/login',
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': Laravel.csrfToken
                     },
                     data: data,
-                    success: function(response) {
+                    success: function(response, status, request) {
                         self.buttonDisabled = false
                         self.succesfullLogin = true
                         self.message = "Successfully logged in. Redirecting to your dashboard"
@@ -96,7 +94,8 @@
                         }, 1500);
                     },
                     error: function(err){
-                        console.log('Error', err);
+                        self.buttonDisabled = false
+                        ErrorHandler.displayErrors(err);
                     }
                 });
             }

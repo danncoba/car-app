@@ -48,13 +48,14 @@ class CategoriesController extends Controller
     {
         $url = "https://www.polovniautomobili.com/auto-oglasi/pretraga?brand=audi&model=&price_from=40000&price_to=&year_from=&year_to=&door_num=&submit_1=&without_price=1&date_limit=&showOldNew=all&modeltxt=&engine_volume_from=&engine_volume_to=&power_from=&power_to=&mileage_from=&mileage_to=&emission_class=&seat_num=&wheel_side=&registration=&country=&city=&page=&sort=";
         $html = HtmlDomParser::file_get_html($url, false, null, 0);
-        $this->getAllCars($html);
+        $cars = $this->getAllCars($html);
+        return $cars;
     }
 
     public function update(Request $request, $category)
     {
         $this->validate($request, [
-            'ime' => 'required'
+            'ime' => 'required|string|max:255|min:3'
         ]);
         $cat = Category::find($category);
         $cat->ime = $request->get('ime');
@@ -71,14 +72,18 @@ class CategoriesController extends Controller
 
     private function getAllCars($dom)
     {
+        $allCars = array();
         foreach ($dom->find('article.single-classified') as $car)
         {
-            var_dump($car->find('.uk-width-1-2.padding-left-10'));
-            var_dump(count($car->childNodes()));
-            var_dump($car->firstChild()->firstChild()->firstChild()->text());
-            var_dump($car->lastChild()->lastChild()->firstChild()->firstChild()->firstChild()->text());
-            die();
+            $singleCar = [];
+
+            $images = $car->find('img');
+            $singleCar['slika'] = $images[0]->getAttribute('src');
+            $singleCar['ime'] = preg_replace("/\s+/", " ", $car->firstChild()->firstChild()->firstChild()->text());
+            $singleCar['cena'] = 'nepoznata';
+            array_push($allCars, $singleCar);
         }
+        return $allCars;
     }
 
 }

@@ -11,6 +11,8 @@ import EditCategory from './components/admin/EditCategory';
 import NewCar from './components/member/NewCar';
 import EditCar from './components/member/EditCar';
 import Auth from './authenticationMiddleware';
+import MainNav from './components/shared/MainNav';
+import Logout from './components/shared/Logout';
 
 let auth = new Auth();
 
@@ -21,7 +23,7 @@ window.Event = new class {
 }
 
 const routes = [
-    { path: '/', component: Home },
+    { path: '/', component: Home, beforeEnter: auth.notAuthRoute },
     { path: '/dashboard', component: Dashboard, beforeEnter: auth.isCurrentAllowedAdmin },
     { path: '/categories', component: Categories, beforeEnter: auth.isCurrentAllowedAdmin },
     { path: '/categories/:id', component: EditCategory, beforeEnter: auth.isCurrentAllowedAdmin },
@@ -29,7 +31,8 @@ const routes = [
     { path: '/dashboard-member', component: DashboardMember, beforeEnter: auth.isCurrentAllowedMember },
     { path: '/dashboard-member/new-car', component: NewCar, beforeEnter: auth.isCurrentAllowedMember },
     { path: '/cars/:id', component: EditCar, beforeEnter: auth.isCurrentAllowedMember },
-    { path: '/login', component: Login }
+    { path: '/login', component: Login, beforeEnter: auth.notAuthRoute },
+    { path: '/logout', component: Logout, beforeEnter: auth.notAuthRoute }
 ]
 
 Vue.use(VueRouter);
@@ -41,5 +44,8 @@ const router = new VueRouter({
 
 const app = new Vue({
     el: '#root',
-    router: router
+    router: router,
+    components: {
+        'main-nav': MainNav
+    }
 })

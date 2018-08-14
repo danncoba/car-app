@@ -71,7 +71,7 @@
                     method: 'POST',
                     url: `/member/cars/${id}/delete`,
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': Laravel.csrfToken
                     },
                     success: function(response) {
                         console.log(response);

@@ -9,6 +9,8 @@
             <shared-links></shared-links>
             <div class="row">
                 <div class="col-md-12">
+                    <error-messages></error-messages>
+                    <div v-if="success" class="alert alert-success">{{successMessage}}</div>
                     <form method="POST" @submit="createNewCar($event)" enctype="multipart/form-data" aria-label="Napravi">
                         <div class="form-group row">
                             <label for="category_id" class="col-sm-4 col-form-label text-md-right">Kategorija</label>
@@ -103,11 +105,14 @@
     </section>
 </template>
 <script>
-import SharedLinks from './SharedLinks';
+import SharedLinks from './SharedLinks'
+import ErrorHandler from '../../errorHandler'
+import ErrorMessages from '../shared/ErrorMessages'
 export default {
     name: 'NewCar',
     components: {
-        'shared-links': SharedLinks
+        'shared-links': SharedLinks,
+        'error-messages': ErrorMessages
     },
     mounted() {
         self = this;
@@ -118,7 +123,7 @@ export default {
                 self.categories = response;
             },
             error: function(err){
-                console.log('Error', err);
+                ErrorHandler.displayErrors(err);
             }
         });
     },
@@ -129,7 +134,9 @@ export default {
             },
             categories: [],
             image: '',
-            allFiles: []
+            allFiles: [],
+            success: false,
+            successMessage: ''
         }
     },
     methods: {
@@ -170,14 +177,14 @@ export default {
                 method: 'POST',
                 url: '/member/cars',
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': Laravel.csrfToken
                 },
             data: self.car,
                 success: function(response) {
                     console.log(response);
                 },
                 error: function(err){
-                    console.log('Error', err);
+                    ErrorHandler.displayErrors(err);
                 }
             });
         },
@@ -194,14 +201,15 @@ export default {
                 processData: false,
                 contentType: false,
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': Laravel.csrfToken
                 },
                 data: data,
                 success: function(response) {
-                    success(response);
+                    self.success = true
+                    self.successMessage = 'Successfully updated category'
                 },
                 error: function(err){
-                    console.log('Error', err);
+                    ErrorHandler.displayErrors(err);
                 }
             });
         }

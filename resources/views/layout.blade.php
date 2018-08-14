@@ -36,17 +36,12 @@
         <div class="container-fluid">
 
             <div id="logo" class="pull-left">
-                <h1><a href="#">AutoCar</a></h1>
+                <h1><router-link to="/">AutoCar</router-link></h1>
             </div>
 
             <nav id="nav-menu-container">
-                <ul class="nav-menu">
                     {{--<li class=""><a href="{{ route('root') }}">Home</a></li>--}}
-                    <li><router-link to="/">Home</router-link></li>
-                    <li><router-link to="/dashboard">Dashboard</router-link></li>
-                    <li><router-link to="/dashboard-member">Dashboard</router-link></li>
-                    <li><router-link to="/login">Login</router-link></li>
-                </ul>
+                <main-nav></main-nav>
             </nav><!-- #nav-menu-container -->
         </div>
     </header><!-- #header -->
@@ -71,7 +66,7 @@
 </main> --}}
 
 
-<a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
+{{-- <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a> --}}
 
 <!-- JavaScript Libraries -->
 <script src="/lib/jquery/jquery.min.js"></script>
@@ -89,7 +84,11 @@
 <script src="/lib/touchSwipe/jquery.touchSwipe.min.js"></script>
 <!-- Contact Form JavaScript File -->
 <script src="/contactform/contactform.js"></script>
-
+<script>
+    window.Laravel = {!! json_encode([
+        'csrfToken' => csrf_token()
+    ]) !!};
+</script>
 <!-- Template Main Javascript File -->
 <script src="/js/main.js"></script>
 {{--<script src="/lib/vue.js"></script>--}}

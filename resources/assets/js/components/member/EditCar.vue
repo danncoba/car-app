@@ -163,7 +163,7 @@ export default {
                     method: 'POST',
                     url: '/member/cars',
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': Laravel.csrfToken
                     },
                     data: self.car,
                     success: function(response) {
@@ -189,7 +189,7 @@ export default {
                 processData: false,
                 contentType: false,
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': Laravel.csrfToken
                 },
                 data: data,
                 success: function(response) {
