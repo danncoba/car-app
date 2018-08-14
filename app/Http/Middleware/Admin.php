@@ -22,7 +22,11 @@ class Admin
         }
         elseif (Auth::check() && Auth::user()->type == 'member')
         {
-            return redirect('/member/dashboard');
+            return response('Not member', 403);
+        }
+        else
+        {
+            return response('Not authenticated', 401);
         }
     }
 }

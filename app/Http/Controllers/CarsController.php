@@ -19,20 +19,26 @@ class CarsController extends Controller
     public function index()
     {
         $cars = Auth::user()->cars;
-        return view('member.cars.index', compact('cars'));
+        return $cars;
     }
 
     public function newAction()
     {
         $categories = Category::all();
-        return view('member.cars.new', compact('categories'));
+        return $categories;
+    }
+
+    public function uploadPicture(Request $request)
+    {
+        $slika = $this->uploadFile($request);
+        return $slika;
     }
 
     public function edit($c)
     {
         $categories = Category::all();
         $car = Car::find($c);
-        return view('member.cars.edit', compact('car','categories'));
+        return ['categories' => $categories, 'car' => $car];
     }
 
     public function create(Request $request)
@@ -42,7 +48,6 @@ class CarsController extends Controller
             'kilometraza' => 'required|numeric',
             'godiste' => 'required|numeric',
             'cena' => 'required|numeric',
-            'slika' => 'file|max:1024',
             'category_id' => 'required|numeric',
         ]);
         $ime = $request->get('ime');
@@ -50,7 +55,7 @@ class CarsController extends Controller
         $godiste = $request->get('godiste');
         $opis = $request->get('opis');
         $kilometraza = $request->get('kilometraza');
-        $slika = $this->uploadFile($request);
+        $slika = $request->get('slika');
 
         $category_id = $request->get('category_id');
         $car = Car::create([
@@ -92,8 +97,9 @@ class CarsController extends Controller
     {
         $carDeleting = Car::find($car);
         $carDeleting->delete();
-        return redirect()->route('categories');
+        return "Successfully deleted";
     }
+
 
     private function uploadFile($request)
     {

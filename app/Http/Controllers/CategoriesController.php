@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Category;
 use Illuminate\Http\Request;
+use Sunra\PhpSimple\HtmlDomParser;
 
 class CategoriesController extends Controller
 {
@@ -18,7 +19,7 @@ class CategoriesController extends Controller
     public function index()
     {
         $categories = Category::all();
-        return view('categories.index', compact('categories'));
+        return $categories;
     }
 
     public function newAction()
@@ -26,9 +27,9 @@ class CategoriesController extends Controller
         return view('categories.new');
     }
 
-    public function edit(Category $category)
+    public function edit($category)
     {
-        return view('categories.edit', compact('category'));
+        return Category::find($category);
     }
 
     public function create(Request $request)
@@ -37,10 +38,17 @@ class CategoriesController extends Controller
             'ime' => 'required|string|max:255|min:3'
         ]);
         $ime = $request->get('ime');
-        Category::create([
+        $category = Category::create([
             'ime' => $ime,
         ]);
-        return redirect()->route('categories');
+        return $category;
+    }
+
+    public function loadExternal()
+    {
+        $url = "https://www.polovniautomobili.com/auto-oglasi/pretraga?brand=audi&model=&price_from=40000&price_to=&year_from=&year_to=&door_num=&submit_1=&without_price=1&date_limit=&showOldNew=all&modeltxt=&engine_volume_from=&engine_volume_to=&power_from=&power_to=&mileage_from=&mileage_to=&emission_class=&seat_num=&wheel_side=&registration=&country=&city=&page=&sort=";
+        $html = HtmlDomParser::file_get_html($url, false, null, 0);
+        $this->getAllCars($html);
     }
 
     public function update(Request $request, $category)
@@ -58,7 +66,19 @@ class CategoriesController extends Controller
     {
         $cat = Category::find($category);
         $cat->delete();
-        return redirect()->route('categories');
+        return response()->json('All ok', 200);
+    }
+
+    private function getAllCars($dom)
+    {
+        foreach ($dom->find('article.single-classified') as $car)
+        {
+            var_dump($car->find('.uk-width-1-2.padding-left-10'));
+            var_dump(count($car->childNodes()));
+            var_dump($car->firstChild()->firstChild()->firstChild()->text());
+            var_dump($car->lastChild()->lastChild()->firstChild()->firstChild()->firstChild()->text());
+            die();
+        }
     }
 
 }

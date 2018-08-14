@@ -18,6 +18,6 @@ class AdminCarsController extends Controller
         $c = Car::find($car);
         $c->odobren = true;
         $c->save();
-        return redirect()->route('home');
+        return $c;
     }
 }

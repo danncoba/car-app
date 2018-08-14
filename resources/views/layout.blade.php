@@ -6,6 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Favicons -->
     <link href="/img/favicon.png" rel="icon">
@@ -29,53 +30,46 @@
 </head>
 <body>
 
-<!--==========================
-  Header
-============================-->
-<header id="header">
-    <div class="container-fluid">
+<div id="root">
 
-        <div id="logo" class="pull-left">
-            <h1><a href="#intro" class="scrollto">AutoCar</a></h1>
+    <header id="header">
+        <div class="container-fluid">
+
+            <div id="logo" class="pull-left">
+                <h1><a href="#">AutoCar</a></h1>
+            </div>
+
+            <nav id="nav-menu-container">
+                <ul class="nav-menu">
+                    {{--<li class=""><a href="{{ route('root') }}">Home</a></li>--}}
+                    <li><router-link to="/">Home</router-link></li>
+                    <li><router-link to="/dashboard">Dashboard</router-link></li>
+                    <li><router-link to="/dashboard-member">Dashboard</router-link></li>
+                    <li><router-link to="/login">Login</router-link></li>
+                </ul>
+            </nav><!-- #nav-menu-container -->
         </div>
+    </header><!-- #header -->
+    <router-view>
 
-        <nav id="nav-menu-container">
-            <ul class="nav-menu">
-                <li class=""><a href="{{ route('root') }}">Home</a></li>
-                @auth
-                    @if(Auth::user()->type == 'admin')
-                        <li><a href="{{ route('home') }}"> Dashboard </a></li>
-                    @else
-                        <li><a href="{{ route('member_cars') }}"> Dashboard </a></li>
-                    @endif
-                    <li><a href="{{ url('/logout') }}"> Logout </a></li>
-                @endauth
-                @guest
-                <li><a href="{{ route('login') }}">Login</a></li>
-                @endguest
-            </ul>
-        </nav><!-- #nav-menu-container -->
-    </div>
-</header><!-- #header -->
+    </router-view>
+    <footer id="footer">
 
-<main id="main">
+        <div class="container">
+            <div class="copyright">
+                &copy; Copyright <strong>Danijel Djuric</strong>. All Rights Reserved
+            </div>
+            <div class="credits">
+                Designed by <a href="">Danijel Djuric</a>
+            </div>
+        </div>
+    </footer><!-- #footer -->
+</div>
+
+{{-- <main id="main">
     @yield('content')
-</main>
+</main> --}}
 
-<!--==========================
-  Footer
-============================-->
-<footer id="footer">
-
-    <div class="container">
-        <div class="copyright">
-            &copy; Copyright <strong>BizPage</strong>. All Rights Reserved
-        </div>
-        <div class="credits">
-            Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-        </div>
-    </div>
-</footer><!-- #footer -->
 
 <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
 
@@ -98,6 +92,12 @@
 
 <!-- Template Main Javascript File -->
 <script src="/js/main.js"></script>
-
+{{--<script src="/lib/vue.js"></script>--}}
+{{--<script src="/lib/vue-router.js"></script>--}}
+{{--<script src="/vue/components/home.js"></script>--}}
+{{--<script src="/vue/components/dashboard.js"></script>--}}
+{{--<script src="/vue/components/login.js"></script>--}}
+{{--<script src="/vue/main-app.js"></script>--}}
+<script src="/js/app/js/app.js"></script>
 </body>
 </html>

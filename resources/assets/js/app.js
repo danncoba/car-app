@@ -1,22 +1,45 @@
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import './bootstrap';
+import Home from './components/Home';
+import Dashboard from './components/Dashboard';
+import DashboardMember from './components/DashboardMember';
+import Categories from './components/Categories';
+import Login from './components/Login';
+import NewCategory from './components/admin/NewCategory';
+import EditCategory from './components/admin/EditCategory';
+import NewCar from './components/member/NewCar';
+import EditCar from './components/member/EditCar';
+import Auth from './authenticationMiddleware';
 
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
- */
+let auth = new Auth();
 
-require('./bootstrap');
+window.Event = new class {
+    constructor() {
+        this.vue = new Vue();
+    }
+}
 
-window.Vue = require('vue');
+const routes = [
+    { path: '/', component: Home },
+    { path: '/dashboard', component: Dashboard, beforeEnter: auth.isCurrentAllowedAdmin },
+    { path: '/categories', component: Categories, beforeEnter: auth.isCurrentAllowedAdmin },
+    { path: '/categories/:id', component: EditCategory, beforeEnter: auth.isCurrentAllowedAdmin },
+    { path: '/new-category', component: NewCategory, beforeEnter: auth.isCurrentAllowedAdmin },
+    { path: '/dashboard-member', component: DashboardMember, beforeEnter: auth.isCurrentAllowedMember },
+    { path: '/dashboard-member/new-car', component: NewCar, beforeEnter: auth.isCurrentAllowedMember },
+    { path: '/cars/:id', component: EditCar, beforeEnter: auth.isCurrentAllowedMember },
+    { path: '/login', component: Login }
+]
 
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
+Vue.use(VueRouter);
 
-Vue.component('example-component', require('./components/ExampleComponent.vue'));
+const router = new VueRouter({
+    mode: 'history',
+    routes: routes
+})
 
 const app = new Vue({
-    el: '#app'
-});
+    el: '#root',
+    router: router
+})
