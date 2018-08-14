@@ -50437,8 +50437,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             console.log('Id updated: ', id);
         },
         updateCategorySearch: function updateCategorySearch(newCategory) {
+            this.elementsLoaded = false;
             if (newCategory === '') {
                 this.fetchCars();
+                return;
+            } else if (newCategory === '1') {
+                this.getExternal();
                 return;
             }
             var self = this;
@@ -50446,8 +50450,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 return response.json();
             }).then(function (res) {
                 self.cars = res;
+                self.elementsLoaded = true;
             }).catch(function (err) {
                 console.log(err);
+            });
+        },
+
+
+        getExternal: function getExternal() {
+            var self = this;
+            $.ajax({
+                method: 'GET',
+                url: '/api/audi/fetch',
+                success: function success(response) {
+                    self.cars = response;
+                    self.elementsLoaded = true;
+                },
+                error: function error(err) {}
             });
         }
     },
@@ -50949,7 +50968,7 @@ var render = function() {
       _c("div", { staticClass: "img" }, [
         _c("img", {
           staticClass: "img-fluid",
-          attrs: { src: "/uploads/logos/" + _vm.car.slika, alt: "" }
+          attrs: { src: _vm.car.slika, alt: "" }
         }),
         _vm._v(" "),
         _vm._m(0)
@@ -51249,18 +51268,20 @@ var render = function() {
           on: { categoryChanged: _vm.categoryUpdated }
         }),
         _vm._v(" "),
-        _c(
-          "div",
-          { staticClass: "row about-cols" },
-          _vm._l(_vm.cars, function(car) {
-            return _c(
+        _vm.elementsLoaded
+          ? _c(
               "div",
-              { staticClass: "col-md-4 wow" },
-              [_c("car", { attrs: { car: car } })],
-              1
+              { staticClass: "row about-cols" },
+              _vm._l(_vm.cars, function(car) {
+                return _c(
+                  "div",
+                  { staticClass: "col-md-4 wow" },
+                  [_c("car", { attrs: { car: car } })],
+                  1
+                )
+              })
             )
-          })
-        )
+          : _vm._e()
       ],
       1
     ),
@@ -51526,11 +51547,7 @@ var render = function() {
                     return _c("tr", [
                       _c("td", [
                         _c("img", {
-                          attrs: {
-                            width: "50",
-                            height: "50",
-                            src: "/uploads/logos/" + car.slika
-                          }
+                          attrs: { width: "50", height: "50", src: car.slika }
                         })
                       ]),
                       _vm._v(" "),
@@ -51786,12 +51803,7 @@ var render = function() {
                 _vm._l(_vm.cars, function(car) {
                   return _c("tr", [
                     _c("td", [
-                      _c("img", {
-                        attrs: {
-                          width: "50",
-                          src: "/uploads/logos/" + car.slika
-                        }
-                      })
+                      _c("img", { attrs: { width: "50", src: car.slika } })
                     ]),
                     _vm._v(" "),
                     _c("td", [_vm._v(_vm._s(car.ime))]),
@@ -54118,7 +54130,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             success: function success(response) {
                 self.categories = response.categories;
                 self.car = response.car;
-                self.image = '/uploads/logos/' + self.car.slika;
+                self.image = self.car.slika;
             },
             error: function error(err) {
                 console.log('Error', err);

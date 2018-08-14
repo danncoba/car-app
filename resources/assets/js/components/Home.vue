@@ -3,7 +3,7 @@
         <div class="container">
             <cars-header @categoryChanged="categoryUpdated" :categories="categories"></cars-header>
             <!--<modal></modal>-->
-            <div class="row about-cols">
+            <div class="row about-cols" v-if="elementsLoaded">
                 <div class="col-md-4 wow" v-for="car in cars">
                     <car v-bind:car="car"></car>
                 </div>
@@ -59,8 +59,7 @@
             },
 
             updateCategorySearch(newCategory) {
-                console.log(newCategory);
-                console.log(typeof(newCategory));
+                this.elementsLoaded = false
                 if(newCategory === '') {
                     this.fetchCars();
                     return;
@@ -73,6 +72,7 @@
                     return response.json()
                 }).then(function(res){
                     self.cars = res;
+                    self.elementsLoaded = true;
                 }).catch(function(err){
                     console.log(err);
                 })
@@ -85,6 +85,7 @@
                     url: '/api/audi/fetch',
                     success: function(response){
                         self.cars = response
+                        self.elementsLoaded = true
                     },
                     error: function(err){
 

@@ -52,6 +52,7 @@ class WelcomeController extends Controller
             $singleCar = [];
 
             $images = $car->find('img');
+            $allDetails = $car->find('div');
             if($images[0]->hasAttribute('data-src'))
             {
                 $singleCar['slika'] = $images[0]->getAttribute('data-src');
@@ -63,8 +64,38 @@ class WelcomeController extends Controller
             $price = $car->find('span.price');
             $singleCar['ime'] = preg_replace("/\s+/", " ", $car->firstChild()->firstChild()->firstChild()->text());
             $singleCar['cena'] = $price[0]->text();
+            $godiste = $this->getGodisteIKilometrazu(preg_replace("/\s+/", " ", $allDetails[0]->text()));
+            $singleCar['godiste'] = $godiste['km_text'];
+            $singleCar['kilometraza'] = $godiste['kilometraza'];
             array_push($allCars, $singleCar);
         }
         return $allCars;
+    }
+
+    private function getGodisteIKilometrazu($text)
+    {
+        $details = explode("|", $text);
+        $explodedDetails = explode(" ", $details[0]);
+        $explodedKilometraza = explode(" ", $details[1]);
+        $cleanExplodedKilometraza = array_filter($explodedKilometraza);
+        $kljucevi = array_keys($cleanExplodedKilometraza);
+        $kilometraza = $cleanExplodedKilometraza[$kljucevi[0]];
+        $kilometraza = str_replace('.', '', $kilometraza);
+        $positionOfKmText = array_search('god.', $explodedDetails);
+
+        if(!$positionOfKmText)
+        {
+            return ['km_text' => $this->getOtherPosition($explodedDetails), 'kilometraza' => $kilometraza];
+        }
+
+        return ['km_text' => $explodedDetails[$positionOfKmText - 1], 'kilometraza' => $kilometraza];
+    }
+
+    private function getOtherPosition($detailsArray)
+    {
+        $newArray = array_filter($detailsArray);
+        $size = sizeof($newArray);
+        $newGodisteValue = str_replace('.', '', $newArray[$size]);
+        return $newGodisteValue;
     }
 }
