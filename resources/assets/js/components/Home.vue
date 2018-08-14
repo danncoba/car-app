@@ -59,8 +59,13 @@
             },
 
             updateCategorySearch(newCategory) {
+                console.log(newCategory);
+                console.log(typeof(newCategory));
                 if(newCategory === '') {
                     this.fetchCars();
+                    return;
+                }else if(newCategory === '1') {
+                    this.getExternal();
                     return;
                 }
                 let self = this;
@@ -70,6 +75,20 @@
                     self.cars = res;
                 }).catch(function(err){
                     console.log(err);
+                })
+            },
+
+            getExternal: function() {
+                var self = this;
+                $.ajax({
+                    method: 'GET',
+                    url: '/api/audi/fetch',
+                    success: function(response){
+                        self.cars = response
+                    },
+                    error: function(err){
+
+                    }
                 })
             }
         },

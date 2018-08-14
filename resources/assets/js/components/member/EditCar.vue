@@ -117,7 +117,7 @@ export default {
             success: function(response) {
                 self.categories = response.categories;
                 self.car = response.car
-                self.image = '/uploads/logos/' + self.car.slika
+                self.image = self.car.slika
             },
             error: function(err){
                 console.log('Error', err);

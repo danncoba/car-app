@@ -20,7 +20,7 @@ class CreateCarsTable extends Migration
             $table->integer('godiste')->nullable(false);
             $table->text('opis')->nullable(true);
             $table->bigInteger('kilometraza')->nullable(true);
-            $table->string('slika')->nullable(false)->default('avatar.jpg');
+            $table->string('slika')->nullable(false)->default('/uploads/logos/avatar.jpg');
             $table->boolean('odobren')->default(false);
             $table->integer('category_id');
             $table->integer('user_id');

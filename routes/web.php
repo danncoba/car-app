@@ -10,6 +10,7 @@ Route::get('/search/{category}', 'WelcomeController@search')->name('search_cars'
 // Authentication Routes...
 Route::get('/api/login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('/api/login', 'Auth\LoginController@login');
+Route::get('/api/audi/fetch', 'WelcomeController@loadExternal')->name('fetch_audi_frontend');
 
 Route::get('/api/logout', 'Auth\LoginController@logout')->name('logout');
 

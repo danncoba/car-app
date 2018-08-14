@@ -109,9 +109,9 @@ class CarsController extends Controller
             $extension = $file->getClientOriginalExtension(); // getting image extension
             $filename =time().'.'.$extension;
             $file->move('uploads/logos/', $filename);
-            return $filename;
+            return '/uploads/logos/'.$filename;
         }
-        return 'avatar.jpg';
+        return '/uploads/logos/avatar.jpg';
     }
 
     private function updateUploadFile($request, $picture)
@@ -124,6 +124,6 @@ class CarsController extends Controller
             $file->move('uploads/logos/', $filename);
             return $filename;
         }
-        return $picture;
+        return '/uploads/logos/'.$picture;
     }
 }

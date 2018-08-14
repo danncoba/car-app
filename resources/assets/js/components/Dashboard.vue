@@ -18,7 +18,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="car in cars">
-                                    <td><img width="50" height="50" :src="'/uploads/logos/' + car.slika" /></td>
+                                    <td><img width="50" height="50" :src="car.slika" /></td>
                                     <td>{{car.ime}}</td>
                                     <td>{{car.kilometraza}}</td>
                                     <td>{{car.cena}}</td>
