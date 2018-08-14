@@ -6,6 +6,7 @@
                     <h2>New Category</h2>
                 </div>
             </div>
+            <shared-links></shared-links>
             <div class="row">
                 <div class="col-md-12">
                     <form method="POST" action="" v-on:submit="createCategory($event)">
@@ -30,8 +31,12 @@
     </section>
 </template>
 <script>
+import SharedLinks from './SharedLinks.vue'
 export default {
     name: 'NewCategory',
+    components: {
+        'shared-links': SharedLinks
+    },
     data: function(){
         return{
             ime: ''

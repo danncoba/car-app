@@ -1,6 +1,6 @@
 <template>
     <div>
-        <section ng-if="loaded">
+        <section v-if="loaded">
             <div class="container">
                 <div class="row">
                     <div class="col-md-12">
@@ -32,7 +32,7 @@
                 </div>
             </div>
         </section>
-        <section ng-if="!loaded">
+        <section v-if="!loaded">
             <div class="col-md-12 wow">
                 <div class="main-app-loader">
                     <div class="lds-dual-ring"></div>
@@ -69,7 +69,6 @@
         },
         methods: {
             approveCategory: function(ev, id){
-                ///dashboard/cars/approve/{car}
                 ev.preventDefault();
                 console.log("Odobri auto sa id: ", id);
                 $.ajax({

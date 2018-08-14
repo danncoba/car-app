@@ -6,6 +6,7 @@
                     <h2>Update kategoriju: {{category.ime}}</h2>
                 </div>
             </div>
+            <shared-links></shared-links>
             <div class="row">
                 <div class="col-md-12">
                     <form method="POST" action="" v-on:submit="updateCategory($event)">
@@ -29,8 +30,12 @@
     </section>
 </template>
 <script>
+import SharedLinks from './SharedLinks.vue'
 export default {
     name: 'EditCategory',
+    components: {
+        'shared-links': SharedLinks
+    },
     data: function(){
         return{
             category: {}
