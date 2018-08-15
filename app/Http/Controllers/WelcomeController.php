@@ -28,24 +28,33 @@ class WelcomeController extends Controller
         return view('search', compact('cars'));
     }
 
-    public function apiCars()
+    public function apiCars(Request $request)
     {
+        $page = (int)$request->query('page');
+        $skip = ($page-1)*15;
         $cars = DB::table('cars')
             ->where('odobren', '=', 1)
             ->orderBy('created_at', 'DESC')
-            ->skip(0)->take(15)->get();
+            ->skip($skip)->take(15)->get();
         $categories = Category::all();
-        return response()->json(array('cars' => $cars, 'categories' => $categories));
+        $count = Car::count();
+        return response()->json(array('cars' => $cars, 'categories' => $categories, 'count' => $count));
     }
 
-    public function searchCars($id)
+    public function searchCars(Request $request, $id)
     {
+        $page = (int)$request->query('page');
+        $skip = ($page-1)*15;
         $cars = DB::table('cars')
             ->where('category_id', '=', $id)
             ->where('odobren', '=', 1)
             ->orderBy('created_at', 'DESC')
-            ->skip(0)->take(15)->get();
-        return $cars;
+            ->skip($skip)->take(15)->get();
+        $count = DB::table('cars')
+            ->where('category_id', '=', $id)
+            ->where('odobren', '=', 1)
+            ->count();
+        return response()->json(array('cars' => $cars, 'count' => $count));
     }
 
     public function loadExternal()

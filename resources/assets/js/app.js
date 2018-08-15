@@ -13,6 +13,7 @@ import EditCar from './components/member/EditCar';
 import Auth from './authenticationMiddleware';
 import MainNav from './components/shared/MainNav';
 import Logout from './components/shared/Logout';
+import Paginate from 'vuejs-paginate';
 
 let auth = new Auth();
 
@@ -36,6 +37,7 @@ const routes = [
 ]
 
 Vue.use(VueRouter);
+Vue.component('paginate', Paginate);
 
 const router = new VueRouter({
     mode: 'history',

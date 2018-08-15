@@ -18,7 +18,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(car, index) in cars">
-                                    <td><img width="50" height="50" :src="car.slika" /></td>
+                                    <td><img width="50" :src="car.slika" /></td>
                                     <td>{{car.ime}}</td>
                                     <td>{{car.kilometraza}}</td>
                                     <td>{{car.cena}}</td>
@@ -30,6 +30,20 @@
                             </tbody>
                         </table>
                     </div>
+                    <paginate
+                        v-model="page"
+                        :page-count="pageCount"
+                        :click-handler="setPage"
+                        :prev-text="'Prev'"
+                        :next-text="'Next'"
+                        :container-class="'pagination'"
+                        :page-class="'page-item'"
+                        :page-link-class="'page-link'"
+                        :prev-class="'page-item'"
+                        :prev-link-class="'page-link'"
+                        :next-class="'page-item'"
+                        :next-link-class="'page-link'">
+                    </paginate>
                 </div>
             </div>
         </section>
@@ -51,22 +65,7 @@
             'shared-links': SharedLinks,
         },
         mounted() {
-            self = this;
-            $.ajax({
-                method: 'GET',
-                url: 'api/dashboard',
-                success: function(response) {
-                    self.cars = response
-                    self.loaded = true;
-                    console.log("Response: ", response);
-                },
-                error: function(err){
-                    if(err.status === 401){
-                        self.$router.push('/login')
-                    }
-                    console.log('Error', err);
-                }
-            });
+            this.getCars()
         },
         methods: {
             approveCategory: function(ev, id, index){
@@ -85,12 +84,37 @@
                         console.log("Error odobravanja, ", err);
                     }
                 });
+            },
+            getCars() {
+                self = this
+                $.ajax({
+                    method: 'GET',
+                    url: `api/dashboard?page=${self.page}`,
+                    success: function(response) {
+                        self.cars = response.cars
+                        self.pageCount = Math.ceil(response.count / 20)
+                        self.loaded = true
+                        console.log("Response: ", response);
+                    },
+                    error: function(err){
+                        if(err.status === 401){
+                            self.$router.push('/login')
+                        }
+                        console.log('Error', err);
+                    }
+                });
+            },
+            setPage(page) {
+                this.page = page
+                this.getCars()
             }
         },
         data: function(){
             return{
                 cars: [],
-                loaded: false
+                loaded: false,
+                page: 1,
+                pageCount: 0
             }
         }
     }

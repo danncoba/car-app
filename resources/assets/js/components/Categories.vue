@@ -26,6 +26,20 @@
                         </tbody>
                     </table>
                 </div>
+                <paginate
+                    v-model="page"
+                    :page-count="pageCount"
+                    :click-handler="setPage"
+                    :prev-text="'Prev'"
+                    :next-text="'Next'"
+                    :container-class="'pagination'"
+                    :page-class="'page-item'"
+                    :page-link-class="'page-link'"
+                    :prev-class="'page-item'"
+                    :prev-link-class="'page-link'"
+                    :next-class="'page-item'"
+                    :next-link-class="'page-link'">
+                </paginate>
             </div>
         </div>
         <div class="container" v-if="!loaded">
@@ -49,47 +63,57 @@
             'error-messages': ErrorMessages
         },
         mounted() {
-            var self = this;
-            $.ajax({
+            this.getCategories()
+        },
+
+        data: function(){
+            return{
+                categories: [],
+                loaded: false,
+                page: 1,
+                pageCount: 0
+            }
+        },
+
+        methods: {
+            setPage(page) {
+                this.page = page
+                this.getCategories()
+            },
+            getCategories(){
+                var self = this;
+                $.ajax({
                     method: 'GET',
-                    url: '/api/dashboard/categories',
+                    url: `/api/dashboard/categories?page=${self.page}`,
                     success: function(response) {
-                        self.categories = response
+                        self.categories = response.categories
+                        self.pageCount = Math.ceil(response.count / 20)
                         self.loaded = true;
                     },
                     error: function(err){
                         ErrorHandler.displayErrors(err)
                     }
                 });
-        },
-
-        data: function(){
-            return{
-                categories: [],
-                loaded: false
-            }
-        },
-
-        methods: {
+            },
             deleteCategory: function(categoryId, index, ev){
                 let self = this;
                 ev.preventDefault();
-                $.ajax({
-                    method: 'POST',
-                    url: `/api/dashboard/categories/${categoryId}/delete`,
-                    headers: {
-                        'X-CSRF-TOKEN': Laravel.csrfToken
-                    },
-                    success: function(response) {
-                        var r = confirm("Do you want to delete this category?");
-                        if (r == true) {
+                var r = confirm("Do you want to delete this category?");
+                if (r == true) {
+                    $.ajax({
+                        method: 'POST',
+                        url: `/api/dashboard/categories/${categoryId}/delete`,
+                        headers: {
+                            'X-CSRF-TOKEN': Laravel.csrfToken
+                        },
+                        success: function(response) {
                             self.categories.splice(index, 1)
+                        },
+                        error: function(err){
+                            ErrorHandler.displayErrors(err)
                         }
-                    },
-                    error: function(err){
-                        ErrorHandler.displayErrors(err)
-                    }
-                });
+                    });
+                }
             }
         }
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Category;
 use Illuminate\Http\Request;
 use Sunra\PhpSimple\HtmlDomParser;
+use Illuminate\Support\Facades\DB;
 
 class CategoriesController extends Controller
 {
@@ -16,10 +17,14 @@ class CategoriesController extends Controller
     }
 
 
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::all();
-        return $categories;
+        $page = (int)$request->query('page');
+        $skip = ($page-1)*20;
+        $categories = DB::table('categories')
+            ->skip($skip)->take(20)->get();
+        $count = DB::table('categories')->count();
+        return response()->json(array('categories'=> $categories, 'count' => $count));
     }
 
     public function newAction()

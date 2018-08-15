@@ -7,6 +7,7 @@ use App\Category;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CarsController extends Controller
 {
@@ -16,10 +17,18 @@ class CarsController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $cars = Auth::user()->cars;
-        return $cars;
+        $page = (int)$request->query('page');
+        $skip = ($page-1)*20;
+        $cars = DB::table('cars')
+            ->where('user_id', '=', Auth::user()->id)
+            ->orderBy('created_at', 'DESC')
+            ->skip($skip)->take(20)->get();
+        $count = DB::table('cars')
+            ->where('user_id', '=', Auth::user()->id)
+            ->count();
+        return response()->json(array('cars' => $cars, 'count' => $count));
     }
 
     public function newAction()
@@ -76,8 +85,8 @@ class CarsController extends Controller
         $this->validate($request, [
             'ime' => 'required|string|max:255|min:3',
             'kilometraza' => 'required|numeric',
+            'godiste' => 'required|numeric',
             'cena' => 'required|numeric',
-            'slika' => 'file|max:1024',
             'category_id' => 'required|numeric',
         ]);
         $car = Car::find($c);
@@ -86,7 +95,7 @@ class CarsController extends Controller
         $car->godiste = $request->get('godiste');
         $car->opis = $request->get('opis');
         $car->kilometraza = $request->get('kilometraza');
-        $car->slika = $this->updateUploadFile($request, $car->slika);
+        $car->slika = $request->get('slika');
         $car->category_id = $request->get('category_id');
 
         $car->save();
@@ -112,18 +121,5 @@ class CarsController extends Controller
             return '/uploads/logos/'.$filename;
         }
         return '/uploads/logos/avatar.jpg';
-    }
-
-    private function updateUploadFile($request, $picture)
-    {
-        if($request->hasfile('slika'))
-        {
-            $file = $request->file('slika');
-            $extension = $file->getClientOriginalExtension(); // getting image extension
-            $filename =time().'.'.$extension;
-            $file->move('uploads/logos/', $filename);
-            return $filename;
-        }
-        return '/uploads/logos/'.$picture;
     }
 }

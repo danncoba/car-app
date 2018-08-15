@@ -8,6 +8,20 @@
                     <car v-bind:car="car"></car>
                 </div>
             </div>
+            <paginate
+                    v-model="page"
+                    :page-count="pageCount"
+                    :click-handler="setPage"
+                    :prev-text="'Prev'"
+                    :next-text="'Next'"
+                    :container-class="'pagination'"
+                    :page-class="'page-item'"
+                    :page-link-class="'page-link'"
+                    :prev-class="'page-item'"
+                    :prev-link-class="'page-link'"
+                    :next-class="'page-item'"
+                    :next-link-class="'page-link'">
+                </paginate>
         </div>
         <div class="container" v-if="!elementsLoaded">
             <div class="col-md-12 wow">
@@ -36,23 +50,31 @@
             return{
                 cars: [],
                 categories: [],
-                elementsLoaded: false
+                elementsLoaded: false,
+                page: 1,
+                pageCount: 1
             }
         },
         methods: {
             fetchCars(){
                 self = this;
-                fetch('/api/cars').then(function(response){
+                self.elementsLoaded = false;
+                fetch(`/api/cars?page=${self.page}`).then(function(response){
                     return response.json()
                 }).then(function(res){
                     self.cars = res.cars;
                     self.categories = res.categories;
+                    self.pageCount = Math.ceil(res.count / 15)
                     self.elementsLoaded = true;
                 }).catch(function(err){
                     console.log(err);
                 })
             },
-
+            setPage(page){
+                console.log('page:', page)
+                this.page = page
+                this.fetchCars()
+            },
             categoryUpdated(id){
                 console.log('This is called');
                 console.log('Id updated: ', id);
@@ -71,8 +93,10 @@
                 fetch('/api/cars/search/' + newCategory).then(function(response){
                     return response.json()
                 }).then(function(res){
-                    self.cars = res;
-                    self.elementsLoaded = true;
+                    self.cars = res.cars
+                    self.page = 1
+                    self.pageCount = Math.ceil(res.count / 15)
+                    self.elementsLoaded = true
                 }).catch(function(err){
                     console.log(err);
                 })

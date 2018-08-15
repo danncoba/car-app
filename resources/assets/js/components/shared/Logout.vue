@@ -1,5 +1,14 @@
 <template>
-    <h1>{{message}}</h1>
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12" style="text-align: center;">
+                    <h1>{{message}}</h1>
+                </div>
+            </div>
+        </div>
+    </section>
+
 </template>
 
 <script>

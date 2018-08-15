@@ -171,7 +171,7 @@ export default {
                 self.createCarOnBackend();
             }
         },
-        createCarOnBackend(image = "avatar.jpg"){
+        createCarOnBackend(image = "/uploads/logos/avatar.jpg"){
             self.car.slika = image
             $.ajax({
                 method: 'POST',
@@ -179,9 +179,10 @@ export default {
                 headers: {
                     'X-CSRF-TOKEN': Laravel.csrfToken
                 },
-            data: self.car,
+                data: self.car,
                 success: function(response) {
-                    console.log(response);
+                    self.success = true
+                    self.successMessage = 'Uspijesno napravljen auto'
                 },
                 error: function(err){
                     ErrorHandler.displayErrors(err);
@@ -205,8 +206,7 @@ export default {
                 },
                 data: data,
                 success: function(response) {
-                    self.success = true
-                    self.successMessage = 'Successfully updated category'
+                    success(response);
                 },
                 error: function(err){
                     ErrorHandler.displayErrors(err);

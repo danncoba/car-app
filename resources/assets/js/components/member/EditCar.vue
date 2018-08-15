@@ -3,12 +3,14 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h2>Add new car</h2>
+                    <h2>Azuriraj auto: {{car.ime}}</h2>
                 </div>
             </div>
             <shared-links></shared-links>
             <div class="row">
                 <div class="col-md-12">
+                    <error-messages></error-messages>
+                    <div v-if="success" class="alert alert-success">{{successMessage}}</div>
                     <form method="POST" @submit="updateCar($event)" enctype="multipart/form-data" aria-label="Napravi">
                         <div class="form-group row">
                             <label for="category_id" class="col-sm-4 col-form-label text-md-right">Kategorija</label>
@@ -80,19 +82,19 @@
 
                             <div class="col-md-6">
                                 <div v-if="!image">
-                                    <h2>Select an image</h2>
+                                    <h2>Izaberi sliku</h2>
                                     <input type="file" @change="onFileChange">
                                 </div>
                                 <div v-else>
                                     <img :src="image" width="100" />
-                                    <button @click="removeImage">Remove image</button>
+                                    <button @click="removeImage">Skloni sliku</button>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group row mb-0">
                             <div class="col-md-8 offset-md-4">
                                 <button type="submit" class="btn btn-primary">
-                                    Napravi Auto
+                                    Azuriraj Auto
                                 </button>
                             </div>
                         </div>
@@ -104,10 +106,13 @@
 </template>
 <script>
 import SharedLinks from './SharedLinks';
+import ErrorHandler from '../../errorHandler'
+import ErrorMessages from '../shared/ErrorMessages'
 export default {
     name: 'EditCar',
     components: {
-        'shared-links': SharedLinks
+        'shared-links': SharedLinks,
+        'error-messages': ErrorMessages
     },
     mounted() {
         self = this;
@@ -130,7 +135,9 @@ export default {
             },
             categories: [],
             image: '',
-            allFiles: []
+            allFiles: [],
+            success: false,
+            successMessage: ''
         }
     },
     methods: {
@@ -153,28 +160,37 @@ export default {
         },
         removeImage: function (e) {
             this.image = '';
+            this.car.slika = '/uploads/logos/avatar.jpg';
         },
         updateCar: function(ev){
             var self = this;
             ev.preventDefault();
-            this.uploadFile(function(imageUrl){
-                self.car.slika = imageUrl
-                $.ajax({
-                    method: 'POST',
-                    url: '/member/cars',
-                    headers: {
-                        'X-CSRF-TOKEN': Laravel.csrfToken
-                    },
-                    data: self.car,
-                    success: function(response) {
-                        console.log(response);
-                    },
-                    error: function(err){
-                        console.log('Error', err);
-                    }
+            if(self.allFiles.length > 0){
+                self.uploadFile(function(imageUrl){
+                    self.updateCarOnBackend(imageUrl);
                 });
+            }else{
+                self.updateCarOnBackend(self.car.slika);
+            }
+        },
+        updateCarOnBackend(image){
+            console.log('Image value: ', image);
+            self.car.slika = image
+            $.ajax({
+                method: 'POST',
+                url: `/member/cars/${self.car.id}`,
+                headers: {
+                    'X-CSRF-TOKEN': Laravel.csrfToken
+                },
+                data: self.car,
+                success: function(response) {
+                    self.success = true
+                    self.successMessage = 'Uspijesno azuriran auto'
+                },
+                error: function(err){
+                    ErrorHandler.displayErrors(err);
+                }
             });
-
         },
         uploadFile(success){
             var self = this;

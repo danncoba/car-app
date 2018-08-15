@@ -14382,7 +14382,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__components_shared_MainNav___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_13__components_shared_MainNav__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__components_shared_Logout__ = __webpack_require__(107);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__components_shared_Logout___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_14__components_shared_Logout__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15_vuejs_paginate__ = __webpack_require__(115);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15_vuejs_paginate___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_15_vuejs_paginate__);
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 
 
 
@@ -14415,6 +14418,7 @@ window.Event = new (function () {
 var routes = [{ path: '/', component: __WEBPACK_IMPORTED_MODULE_3__components_Home___default.a, beforeEnter: auth.notAuthRoute }, { path: '/dashboard', component: __WEBPACK_IMPORTED_MODULE_4__components_Dashboard___default.a, beforeEnter: auth.isCurrentAllowedAdmin }, { path: '/categories', component: __WEBPACK_IMPORTED_MODULE_6__components_Categories___default.a, beforeEnter: auth.isCurrentAllowedAdmin }, { path: '/categories/:id', component: __WEBPACK_IMPORTED_MODULE_9__components_admin_EditCategory___default.a, beforeEnter: auth.isCurrentAllowedAdmin }, { path: '/new-category', component: __WEBPACK_IMPORTED_MODULE_8__components_admin_NewCategory___default.a, beforeEnter: auth.isCurrentAllowedAdmin }, { path: '/dashboard-member', component: __WEBPACK_IMPORTED_MODULE_5__components_DashboardMember___default.a, beforeEnter: auth.isCurrentAllowedMember }, { path: '/dashboard-member/new-car', component: __WEBPACK_IMPORTED_MODULE_10__components_member_NewCar___default.a, beforeEnter: auth.isCurrentAllowedMember }, { path: '/cars/:id', component: __WEBPACK_IMPORTED_MODULE_11__components_member_EditCar___default.a, beforeEnter: auth.isCurrentAllowedMember }, { path: '/login', component: __WEBPACK_IMPORTED_MODULE_7__components_Login___default.a, beforeEnter: auth.notAuthRoute }, { path: '/logout', component: __WEBPACK_IMPORTED_MODULE_14__components_shared_Logout___default.a, beforeEnter: auth.notAuthRoute }];
 
 __WEBPACK_IMPORTED_MODULE_0_vue___default.a.use(__WEBPACK_IMPORTED_MODULE_1_vue_router__["a" /* default */]);
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('paginate', __WEBPACK_IMPORTED_MODULE_15_vuejs_paginate___default.a);
 
 var router = new __WEBPACK_IMPORTED_MODULE_1_vue_router__["a" /* default */]({
     mode: 'history',
@@ -50408,6 +50412,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -50425,21 +50443,30 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         return {
             cars: [],
             categories: [],
-            elementsLoaded: false
+            elementsLoaded: false,
+            page: 1,
+            pageCount: 1
         };
     },
     methods: {
         fetchCars: function fetchCars() {
             self = this;
-            fetch('/api/cars').then(function (response) {
+            self.elementsLoaded = false;
+            fetch('/api/cars?page=' + self.page).then(function (response) {
                 return response.json();
             }).then(function (res) {
                 self.cars = res.cars;
                 self.categories = res.categories;
+                self.pageCount = Math.ceil(res.count / 15);
                 self.elementsLoaded = true;
             }).catch(function (err) {
                 console.log(err);
             });
+        },
+        setPage: function setPage(page) {
+            console.log('page:', page);
+            this.page = page;
+            this.fetchCars();
         },
         categoryUpdated: function categoryUpdated(id) {
             console.log('This is called');
@@ -50458,7 +50485,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             fetch('/api/cars/search/' + newCategory).then(function (response) {
                 return response.json();
             }).then(function (res) {
-                self.cars = res;
+                self.cars = res.cars;
+                self.page = 1;
+                self.pageCount = Math.ceil(res.count / 15);
                 self.elementsLoaded = true;
             }).catch(function (err) {
                 console.log(err);
@@ -51290,7 +51319,30 @@ var render = function() {
                 )
               })
             )
-          : _vm._e()
+          : _vm._e(),
+        _vm._v(" "),
+        _c("paginate", {
+          attrs: {
+            "page-count": _vm.pageCount,
+            "click-handler": _vm.setPage,
+            "prev-text": "Prev",
+            "next-text": "Next",
+            "container-class": "pagination",
+            "page-class": "page-item",
+            "page-link-class": "page-link",
+            "prev-class": "page-item",
+            "prev-link-class": "page-link",
+            "next-class": "page-item",
+            "next-link-class": "page-link"
+          },
+          model: {
+            value: _vm.page,
+            callback: function($$v) {
+              _vm.page = $$v
+            },
+            expression: "page"
+          }
+        })
       ],
       1
     ),
@@ -51421,6 +51473,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -51429,22 +51495,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         'shared-links': __WEBPACK_IMPORTED_MODULE_0__admin_SharedLinks_vue___default.a
     },
     mounted: function mounted() {
-        self = this;
-        $.ajax({
-            method: 'GET',
-            url: 'api/dashboard',
-            success: function success(response) {
-                self.cars = response;
-                self.loaded = true;
-                console.log("Response: ", response);
-            },
-            error: function error(err) {
-                if (err.status === 401) {
-                    self.$router.push('/login');
-                }
-                console.log('Error', err);
-            }
-        });
+        this.getCars();
     },
 
     methods: {
@@ -51464,12 +51515,37 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                     console.log("Error odobravanja, ", err);
                 }
             });
+        },
+        getCars: function getCars() {
+            self = this;
+            $.ajax({
+                method: 'GET',
+                url: 'api/dashboard?page=' + self.page,
+                success: function success(response) {
+                    self.cars = response.cars;
+                    self.pageCount = Math.ceil(response.count / 20);
+                    self.loaded = true;
+                    console.log("Response: ", response);
+                },
+                error: function error(err) {
+                    if (err.status === 401) {
+                        self.$router.push('/login');
+                    }
+                    console.log('Error', err);
+                }
+            });
+        },
+        setPage: function setPage(page) {
+            this.page = page;
+            this.getCars();
         }
     },
     data: function data() {
         return {
             cars: [],
-            loaded: false
+            loaded: false,
+            page: 1,
+            pageCount: 0
         };
     }
 });
@@ -51557,11 +51633,7 @@ var render = function() {
                         return _c("tr", [
                           _c("td", [
                             _c("img", {
-                              attrs: {
-                                width: "50",
-                                height: "50",
-                                src: car.slika
-                              }
+                              attrs: { width: "50", src: car.slika }
                             })
                           ]),
                           _vm._v(" "),
@@ -51603,7 +51675,30 @@ var render = function() {
                       })
                     )
                   ])
-                ])
+                ]),
+                _vm._v(" "),
+                _c("paginate", {
+                  attrs: {
+                    "page-count": _vm.pageCount,
+                    "click-handler": _vm.setPage,
+                    "prev-text": "Prev",
+                    "next-text": "Next",
+                    "container-class": "pagination",
+                    "page-class": "page-item",
+                    "page-link-class": "page-link",
+                    "prev-class": "page-item",
+                    "prev-link-class": "page-link",
+                    "next-class": "page-item",
+                    "next-link-class": "page-link"
+                  },
+                  model: {
+                    value: _vm.page,
+                    callback: function($$v) {
+                      _vm.page = $$v
+                    },
+                    expression: "page"
+                  }
+                })
               ],
               1
             )
@@ -51714,6 +51809,9 @@ module.exports = Component.exports
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__member_SharedLinks__ = __webpack_require__(98);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__member_SharedLinks___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__member_SharedLinks__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__errorHandler__ = __webpack_require__(111);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shared_ErrorMessages__ = __webpack_require__(112);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shared_ErrorMessages___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__shared_ErrorMessages__);
 //
 //
 //
@@ -51752,51 +51850,86 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     name: "DashboardMember",
     components: {
-        'shared-links': __WEBPACK_IMPORTED_MODULE_0__member_SharedLinks___default.a
+        'shared-links': __WEBPACK_IMPORTED_MODULE_0__member_SharedLinks___default.a,
+        'error-messages': __WEBPACK_IMPORTED_MODULE_2__shared_ErrorMessages___default.a
     },
     mounted: function mounted() {
-        self = this;
-        $.ajax({
-            method: 'GET',
-            url: 'member/dashboard',
-            success: function success(response) {
-                self.loaded = true;
-                console.log("Response: ", response);
-                self.cars = response;
-            },
-            error: function error(err) {
-                console.log('Error', err);
-            }
-        });
+        this.getMemberCars();
     },
 
     data: function data() {
         return {
             cars: [],
-            loaded: false
+            loaded: false,
+            success: false,
+            successMessage: '',
+            page: 1,
+            pageCount: 0
         };
     },
     methods: {
-        deleteCar: function deleteCar(ev, id) {
-            ev.preventDefault();
+        getMemberCars: function getMemberCars() {
+            var self = this;
             $.ajax({
-                method: 'POST',
-                url: '/member/cars/' + id + '/delete',
-                headers: {
-                    'X-CSRF-TOKEN': Laravel.csrfToken
-                },
+                method: 'GET',
+                url: 'member/dashboard',
                 success: function success(response) {
-                    console.log(response);
+                    self.loaded = true;
+                    self.cars = response.cars;
+                    self.pageCount = Math.ceil(response.count / 20);
                 },
                 error: function error(err) {
                     console.log('Error', err);
                 }
             });
+        },
+        setPage: function setPage(page) {
+            this.page = page;
+            this.getMemberCars();
+        },
+
+        deleteCar: function deleteCar(ev, index, id) {
+            var self = this;
+            ev.preventDefault();
+            var r = confirm("Do you want to delete this category?");
+            if (r == true) {
+                $.ajax({
+                    method: 'POST',
+                    url: '/member/cars/' + id + '/delete',
+                    headers: {
+                        'X-CSRF-TOKEN': Laravel.csrfToken
+                    },
+                    success: function success(response) {
+                        self.cars.splice(index, 1);
+                    },
+                    error: function error(err) {
+                        __WEBPACK_IMPORTED_MODULE_1__errorHandler__["a" /* default */].displayErrors(err);
+                    }
+                });
+            }
         }
     }
 });
@@ -51818,56 +51951,97 @@ var render = function() {
         _vm._v(" "),
         _c("shared-links"),
         _vm._v(" "),
-        _c("div", { staticClass: "row" }, [
-          _c("div", { staticClass: "col-md-12" }, [
-            _c("table", { staticClass: "table" }, [
-              _vm._m(1),
-              _vm._v(" "),
-              _c(
-                "tbody",
-                _vm._l(_vm.cars, function(car) {
-                  return _c("tr", [
-                    _c("td", [
-                      _c("img", { attrs: { width: "50", src: car.slika } })
-                    ]),
-                    _vm._v(" "),
-                    _c("td", [_vm._v(_vm._s(car.ime))]),
-                    _vm._v(" "),
-                    _c("td", [_vm._v(_vm._s(car.kilometraza))]),
-                    _vm._v(" "),
-                    _c("td", [_vm._v(_vm._s(car.cena))]),
-                    _vm._v(" "),
-                    _c(
-                      "td",
-                      { attrs: { width: "200" } },
-                      [
-                        _c(
-                          "router-link",
-                          { attrs: { to: "/cars/" + car.id } },
-                          [_vm._v("Edit")]
-                        ),
+        _c(
+          "div",
+          { staticClass: "row" },
+          [
+            _c(
+              "div",
+              { staticClass: "col-md-12" },
+              [
+                _c("error-messages"),
+                _vm._v(" "),
+                _vm.success
+                  ? _c("div", { staticClass: "alert alert-success" }, [
+                      _vm._v(_vm._s(_vm.successMessage))
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _c("table", { staticClass: "table" }, [
+                  _vm._m(1),
+                  _vm._v(" "),
+                  _c(
+                    "tbody",
+                    _vm._l(_vm.cars, function(car, index) {
+                      return _c("tr", [
+                        _c("td", [
+                          _c("img", { attrs: { width: "50", src: car.slika } })
+                        ]),
+                        _vm._v(" "),
+                        _c("td", [_vm._v(_vm._s(car.ime))]),
+                        _vm._v(" "),
+                        _c("td", [_vm._v(_vm._s(car.kilometraza))]),
+                        _vm._v(" "),
+                        _c("td", [_vm._v(_vm._s(car.cena))]),
                         _vm._v(" "),
                         _c(
-                          "a",
-                          {
-                            attrs: { href: "#" },
-                            on: {
-                              click: function($event) {
-                                _vm.deleteCar($event, car.id)
-                              }
-                            }
-                          },
-                          [_vm._v("Delete")]
+                          "td",
+                          { attrs: { width: "200" } },
+                          [
+                            _c(
+                              "router-link",
+                              { attrs: { to: "/cars/" + car.id } },
+                              [_vm._v("Edit")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "a",
+                              {
+                                attrs: { href: "#" },
+                                on: {
+                                  click: function($event) {
+                                    _vm.deleteCar($event, index, car.id)
+                                  }
+                                }
+                              },
+                              [_vm._v("Delete")]
+                            )
+                          ],
+                          1
                         )
-                      ],
-                      1
-                    )
-                  ])
-                })
-              )
-            ])
-          ])
-        ])
+                      ])
+                    })
+                  )
+                ])
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c("paginate", {
+              attrs: {
+                "page-count": _vm.pageCount,
+                "click-handler": _vm.setPage,
+                "prev-text": "Prev",
+                "next-text": "Next",
+                "container-class": "pagination",
+                "page-class": "page-item",
+                "page-link-class": "page-link",
+                "prev-class": "page-item",
+                "prev-link-class": "page-link",
+                "next-class": "page-item",
+                "next-link-class": "page-link"
+              },
+              model: {
+                value: _vm.page,
+                callback: function($$v) {
+                  _vm.page = $$v
+                },
+                expression: "page"
+              }
+            })
+          ],
+          1
+        )
       ],
       1
     )
@@ -52006,6 +52180,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -52017,48 +52205,59 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         'error-messages': __WEBPACK_IMPORTED_MODULE_2__shared_ErrorMessages___default.a
     },
     mounted: function mounted() {
-        var self = this;
-        $.ajax({
-            method: 'GET',
-            url: '/api/dashboard/categories',
-            success: function success(response) {
-                self.categories = response;
-                self.loaded = true;
-            },
-            error: function error(err) {
-                __WEBPACK_IMPORTED_MODULE_1__errorHandler__["a" /* default */].displayErrors(err);
-            }
-        });
+        this.getCategories();
     },
 
 
     data: function data() {
         return {
             categories: [],
-            loaded: false
+            loaded: false,
+            page: 1,
+            pageCount: 0
         };
     },
 
     methods: {
-        deleteCategory: function deleteCategory(categoryId, index, ev) {
+        setPage: function setPage(page) {
+            this.page = page;
+            this.getCategories();
+        },
+        getCategories: function getCategories() {
             var self = this;
-            ev.preventDefault();
             $.ajax({
-                method: 'POST',
-                url: '/api/dashboard/categories/' + categoryId + '/delete',
-                headers: {
-                    'X-CSRF-TOKEN': Laravel.csrfToken
-                },
+                method: 'GET',
+                url: '/api/dashboard/categories?page=' + self.page,
                 success: function success(response) {
-                    var r = confirm("Do you want to delete this category?");
-                    if (r == true) {
-                        self.categories.splice(index, 1);
-                    }
+                    self.categories = response.categories;
+                    self.pageCount = Math.ceil(response.count / 20);
+                    self.loaded = true;
                 },
                 error: function error(err) {
                     __WEBPACK_IMPORTED_MODULE_1__errorHandler__["a" /* default */].displayErrors(err);
                 }
             });
+        },
+
+        deleteCategory: function deleteCategory(categoryId, index, ev) {
+            var self = this;
+            ev.preventDefault();
+            var r = confirm("Do you want to delete this category?");
+            if (r == true) {
+                $.ajax({
+                    method: 'POST',
+                    url: '/api/dashboard/categories/' + categoryId + '/delete',
+                    headers: {
+                        'X-CSRF-TOKEN': Laravel.csrfToken
+                    },
+                    success: function success(response) {
+                        self.categories.splice(index, 1);
+                    },
+                    error: function error(err) {
+                        __WEBPACK_IMPORTED_MODULE_1__errorHandler__["a" /* default */].displayErrors(err);
+                    }
+                });
+            }
         }
     }
 });
@@ -52081,59 +52280,89 @@ var render = function() {
             _vm._v(" "),
             _c("shared-links"),
             _vm._v(" "),
-            _c("div", { staticClass: "row" }, [
-              _c(
-                "div",
-                { staticClass: "col-md-12" },
-                [
-                  _c("error-messages"),
-                  _vm._v(" "),
-                  _c("table", { staticClass: "table" }, [
-                    _vm._m(1),
+            _c(
+              "div",
+              { staticClass: "row" },
+              [
+                _c(
+                  "div",
+                  { staticClass: "col-md-12" },
+                  [
+                    _c("error-messages"),
                     _vm._v(" "),
-                    _c(
-                      "tbody",
-                      _vm._l(_vm.categories, function(category, index) {
-                        return _c("tr", [
-                          _c("td", [_vm._v(_vm._s(category.ime))]),
-                          _vm._v(" "),
-                          _c(
-                            "td",
-                            { attrs: { width: "200" } },
-                            [
-                              _c(
-                                "router-link",
-                                { attrs: { to: "/categories/" + category.id } },
-                                [_vm._v("Edit")]
-                              ),
-                              _vm._v(" "),
-                              _c(
-                                "a",
-                                {
-                                  attrs: { href: "#" },
-                                  on: {
-                                    click: function($event) {
-                                      _vm.deleteCategory(
-                                        category.id,
-                                        index,
-                                        $event
-                                      )
+                    _c("table", { staticClass: "table" }, [
+                      _vm._m(1),
+                      _vm._v(" "),
+                      _c(
+                        "tbody",
+                        _vm._l(_vm.categories, function(category, index) {
+                          return _c("tr", [
+                            _c("td", [_vm._v(_vm._s(category.ime))]),
+                            _vm._v(" "),
+                            _c(
+                              "td",
+                              { attrs: { width: "200" } },
+                              [
+                                _c(
+                                  "router-link",
+                                  {
+                                    attrs: { to: "/categories/" + category.id }
+                                  },
+                                  [_vm._v("Edit")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "a",
+                                  {
+                                    attrs: { href: "#" },
+                                    on: {
+                                      click: function($event) {
+                                        _vm.deleteCategory(
+                                          category.id,
+                                          index,
+                                          $event
+                                        )
+                                      }
                                     }
-                                  }
-                                },
-                                [_vm._v("Delete")]
-                              )
-                            ],
-                            1
-                          )
-                        ])
-                      })
-                    )
-                  ])
-                ],
-                1
-              )
-            ])
+                                  },
+                                  [_vm._v("Delete")]
+                                )
+                              ],
+                              1
+                            )
+                          ])
+                        })
+                      )
+                    ])
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c("paginate", {
+                  attrs: {
+                    "page-count": _vm.pageCount,
+                    "click-handler": _vm.setPage,
+                    "prev-text": "Prev",
+                    "next-text": "Next",
+                    "container-class": "pagination",
+                    "page-class": "page-item",
+                    "page-link-class": "page-link",
+                    "prev-class": "page-item",
+                    "prev-link-class": "page-link",
+                    "next-class": "page-item",
+                    "next-link-class": "page-link"
+                  },
+                  model: {
+                    value: _vm.page,
+                    callback: function($$v) {
+                      _vm.page = $$v
+                    },
+                    expression: "page"
+                  }
+                })
+              ],
+              1
+            )
           ],
           1
         )
@@ -53525,7 +53754,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             }
         },
         createCarOnBackend: function createCarOnBackend() {
-            var image = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "avatar.jpg";
+            var image = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "/uploads/logos/avatar.jpg";
 
             self.car.slika = image;
             $.ajax({
@@ -53536,14 +53765,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 },
                 data: self.car,
                 success: function success(response) {
-                    console.log(response);
+                    self.success = true;
+                    self.successMessage = 'Uspijesno napravljen auto';
                 },
                 error: function error(err) {
                     __WEBPACK_IMPORTED_MODULE_1__errorHandler__["a" /* default */].displayErrors(err);
                 }
             });
         },
-        uploadFile: function uploadFile(success) {
+        uploadFile: function uploadFile(_success) {
             var self = this;
             if (!self.allFiles.length) {
                 return;
@@ -53560,8 +53790,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 },
                 data: data,
                 success: function success(response) {
-                    self.success = true;
-                    self.successMessage = 'Successfully updated category';
+                    _success(response);
                 },
                 error: function error(err) {
                     __WEBPACK_IMPORTED_MODULE_1__errorHandler__["a" /* default */].displayErrors(err);
@@ -54187,6 +54416,9 @@ module.exports = Component.exports
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__SharedLinks__ = __webpack_require__(98);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__SharedLinks___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__SharedLinks__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__errorHandler__ = __webpack_require__(111);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shared_ErrorMessages__ = __webpack_require__(112);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__shared_ErrorMessages___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__shared_ErrorMessages__);
 //
 //
 //
@@ -54291,12 +54523,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+
+
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     name: 'EditCar',
     components: {
-        'shared-links': __WEBPACK_IMPORTED_MODULE_0__SharedLinks___default.a
+        'shared-links': __WEBPACK_IMPORTED_MODULE_0__SharedLinks___default.a,
+        'error-messages': __WEBPACK_IMPORTED_MODULE_2__shared_ErrorMessages___default.a
     },
     mounted: function mounted() {
         self = this;
@@ -54319,7 +54556,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             car: {},
             categories: [],
             image: '',
-            allFiles: []
+            allFiles: [],
+            success: false,
+            successMessage: ''
         };
     },
     methods: {
@@ -54342,26 +54581,36 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
         removeImage: function removeImage(e) {
             this.image = '';
+            this.car.slika = '/uploads/logos/avatar.jpg';
         },
         updateCar: function updateCar(ev) {
             var self = this;
             ev.preventDefault();
-            this.uploadFile(function (imageUrl) {
-                self.car.slika = imageUrl;
-                $.ajax({
-                    method: 'POST',
-                    url: '/member/cars',
-                    headers: {
-                        'X-CSRF-TOKEN': Laravel.csrfToken
-                    },
-                    data: self.car,
-                    success: function success(response) {
-                        console.log(response);
-                    },
-                    error: function error(err) {
-                        console.log('Error', err);
-                    }
+            if (self.allFiles.length > 0) {
+                self.uploadFile(function (imageUrl) {
+                    self.updateCarOnBackend(imageUrl);
                 });
+            } else {
+                self.updateCarOnBackend(self.car.slika);
+            }
+        },
+        updateCarOnBackend: function updateCarOnBackend(image) {
+            console.log('Image value: ', image);
+            self.car.slika = image;
+            $.ajax({
+                method: 'POST',
+                url: '/member/cars/' + self.car.id,
+                headers: {
+                    'X-CSRF-TOKEN': Laravel.csrfToken
+                },
+                data: self.car,
+                success: function success(response) {
+                    self.success = true;
+                    self.successMessage = 'Uspijesno azuriran auto';
+                },
+                error: function error(err) {
+                    __WEBPACK_IMPORTED_MODULE_1__errorHandler__["a" /* default */].displayErrors(err);
+                }
             });
         },
         uploadFile: function uploadFile(_success) {
@@ -54404,334 +54653,355 @@ var render = function() {
       "div",
       { staticClass: "container" },
       [
-        _vm._m(0),
+        _c("div", { staticClass: "row" }, [
+          _c("div", { staticClass: "col-md-12" }, [
+            _c("h2", [_vm._v("Azuriraj auto: " + _vm._s(_vm.car.ime))])
+          ])
+        ]),
         _vm._v(" "),
         _c("shared-links"),
         _vm._v(" "),
         _c("div", { staticClass: "row" }, [
-          _c("div", { staticClass: "col-md-12" }, [
-            _c(
-              "form",
-              {
-                attrs: {
-                  method: "POST",
-                  enctype: "multipart/form-data",
-                  "aria-label": "Napravi"
-                },
-                on: {
-                  submit: function($event) {
-                    _vm.updateCar($event)
+          _c(
+            "div",
+            { staticClass: "col-md-12" },
+            [
+              _c("error-messages"),
+              _vm._v(" "),
+              _vm.success
+                ? _c("div", { staticClass: "alert alert-success" }, [
+                    _vm._v(_vm._s(_vm.successMessage))
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _c(
+                "form",
+                {
+                  attrs: {
+                    method: "POST",
+                    enctype: "multipart/form-data",
+                    "aria-label": "Napravi"
+                  },
+                  on: {
+                    submit: function($event) {
+                      _vm.updateCar($event)
+                    }
                   }
-                }
-              },
-              [
-                _c("div", { staticClass: "form-group row" }, [
-                  _c(
-                    "label",
-                    {
-                      staticClass: "col-sm-4 col-form-label text-md-right",
-                      attrs: { for: "category_id" }
-                    },
-                    [_vm._v("Kategorija")]
-                  ),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-6" }, [
+                },
+                [
+                  _c("div", { staticClass: "form-group row" }, [
                     _c(
-                      "select",
+                      "label",
                       {
+                        staticClass: "col-sm-4 col-form-label text-md-right",
+                        attrs: { for: "category_id" }
+                      },
+                      [_vm._v("Kategorija")]
+                    ),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6" }, [
+                      _c(
+                        "select",
+                        {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.car.category_id,
+                              expression: "car.category_id"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            id: "category_id",
+                            name: "category_id",
+                            required: "",
+                            autofocus: ""
+                          },
+                          on: {
+                            change: function($event) {
+                              var $$selectedVal = Array.prototype.filter
+                                .call($event.target.options, function(o) {
+                                  return o.selected
+                                })
+                                .map(function(o) {
+                                  var val = "_value" in o ? o._value : o.value
+                                  return val
+                                })
+                              _vm.$set(
+                                _vm.car,
+                                "category_id",
+                                $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              )
+                            }
+                          }
+                        },
+                        _vm._l(_vm.categories, function(category) {
+                          return _c(
+                            "option",
+                            { domProps: { value: category.id } },
+                            [_vm._v(_vm._s(category.ime))]
+                          )
+                        })
+                      ),
+                      _vm._v(" "),
+                      _vm._m(0)
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group row" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "col-sm-4 col-form-label text-md-right",
+                        attrs: { for: "ime" }
+                      },
+                      [_vm._v("Ime Auta")]
+                    ),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6" }, [
+                      _c("input", {
                         directives: [
                           {
                             name: "model",
                             rawName: "v-model",
-                            value: _vm.car.category_id,
-                            expression: "car.category_id"
+                            value: _vm.car.ime,
+                            expression: "car.ime"
                           }
                         ],
                         staticClass: "form-control",
                         attrs: {
-                          id: "category_id",
-                          name: "category_id",
+                          id: "ime",
+                          type: "text",
+                          name: "ime",
                           required: "",
                           autofocus: ""
                         },
+                        domProps: { value: _vm.car.ime },
                         on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(_vm.car, "ime", $event.target.value)
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _vm._m(1)
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group row" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "col-sm-4 col-form-label text-md-right",
+                        attrs: { for: "cena" }
+                      },
+                      [_vm._v("Cena")]
+                    ),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6" }, [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.car.cena,
+                            expression: "car.cena"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: {
+                          id: "cena",
+                          type: "number",
+                          name: "cena",
+                          required: "",
+                          autofocus: ""
+                        },
+                        domProps: { value: _vm.car.cena },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(_vm.car, "cena", $event.target.value)
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _vm._m(2)
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group row" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "col-sm-4 col-form-label text-md-right",
+                        attrs: { for: "godiste" }
+                      },
+                      [_vm._v("Godiste")]
+                    ),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6" }, [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.car.godiste,
+                            expression: "car.godiste"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: {
+                          id: "godiste",
+                          type: "number",
+                          name: "godiste",
+                          required: "",
+                          autofocus: ""
+                        },
+                        domProps: { value: _vm.car.godiste },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(_vm.car, "godiste", $event.target.value)
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _vm._m(3)
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group row" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "col-sm-4 col-form-label text-md-right",
+                        attrs: { for: "opis" }
+                      },
+                      [_vm._v("Opis")]
+                    ),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6" }, [
+                      _c("textarea", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.car.opis,
+                            expression: "car.opis"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: { id: "opis", name: "opis", autofocus: "" },
+                        domProps: { value: _vm.car.opis },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(_vm.car, "opis", $event.target.value)
+                          }
+                        }
+                      }),
+                      _vm._v(" "),
+                      _vm._m(4)
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group row" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "col-sm-4 col-form-label text-md-right",
+                        attrs: { for: "kilometraza" }
+                      },
+                      [_vm._v("Kilometraza")]
+                    ),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6" }, [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.car.kilometraza,
+                            expression: "car.kilometraza"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: {
+                          id: "kilometraza",
+                          type: "number",
+                          name: "kilometraza",
+                          required: "",
+                          autofocus: ""
+                        },
+                        domProps: { value: _vm.car.kilometraza },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
                             _vm.$set(
                               _vm.car,
-                              "category_id",
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
+                              "kilometraza",
+                              $event.target.value
                             )
                           }
                         }
+                      }),
+                      _vm._v(" "),
+                      _vm._m(5)
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "form-group row" }, [
+                    _c(
+                      "label",
+                      {
+                        staticClass: "col-sm-4 col-form-label text-md-right",
+                        attrs: { for: "slika" }
                       },
-                      _vm._l(_vm.categories, function(category) {
-                        return _c(
-                          "option",
-                          { domProps: { value: category.id } },
-                          [_vm._v(_vm._s(category.ime))]
-                        )
-                      })
+                      [_vm._v("Slika")]
                     ),
                     _vm._v(" "),
-                    _vm._m(1)
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "form-group row" }, [
-                  _c(
-                    "label",
-                    {
-                      staticClass: "col-sm-4 col-form-label text-md-right",
-                      attrs: { for: "ime" }
-                    },
-                    [_vm._v("Ime Auta")]
-                  ),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-6" }, [
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.car.ime,
-                          expression: "car.ime"
-                        }
-                      ],
-                      staticClass: "form-control",
-                      attrs: {
-                        id: "ime",
-                        type: "text",
-                        name: "ime",
-                        required: "",
-                        autofocus: ""
-                      },
-                      domProps: { value: _vm.car.ime },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
-                          }
-                          _vm.$set(_vm.car, "ime", $event.target.value)
-                        }
-                      }
-                    }),
-                    _vm._v(" "),
-                    _vm._m(2)
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "form-group row" }, [
-                  _c(
-                    "label",
-                    {
-                      staticClass: "col-sm-4 col-form-label text-md-right",
-                      attrs: { for: "cena" }
-                    },
-                    [_vm._v("Cena")]
-                  ),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-6" }, [
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.car.cena,
-                          expression: "car.cena"
-                        }
-                      ],
-                      staticClass: "form-control",
-                      attrs: {
-                        id: "cena",
-                        type: "number",
-                        name: "cena",
-                        required: "",
-                        autofocus: ""
-                      },
-                      domProps: { value: _vm.car.cena },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
-                          }
-                          _vm.$set(_vm.car, "cena", $event.target.value)
-                        }
-                      }
-                    }),
-                    _vm._v(" "),
-                    _vm._m(3)
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "form-group row" }, [
-                  _c(
-                    "label",
-                    {
-                      staticClass: "col-sm-4 col-form-label text-md-right",
-                      attrs: { for: "godiste" }
-                    },
-                    [_vm._v("Godiste")]
-                  ),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-6" }, [
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.car.godiste,
-                          expression: "car.godiste"
-                        }
-                      ],
-                      staticClass: "form-control",
-                      attrs: {
-                        id: "godiste",
-                        type: "number",
-                        name: "godiste",
-                        required: "",
-                        autofocus: ""
-                      },
-                      domProps: { value: _vm.car.godiste },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
-                          }
-                          _vm.$set(_vm.car, "godiste", $event.target.value)
-                        }
-                      }
-                    }),
-                    _vm._v(" "),
-                    _vm._m(4)
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "form-group row" }, [
-                  _c(
-                    "label",
-                    {
-                      staticClass: "col-sm-4 col-form-label text-md-right",
-                      attrs: { for: "opis" }
-                    },
-                    [_vm._v("Opis")]
-                  ),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-6" }, [
-                    _c("textarea", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.car.opis,
-                          expression: "car.opis"
-                        }
-                      ],
-                      staticClass: "form-control",
-                      attrs: { id: "opis", name: "opis", autofocus: "" },
-                      domProps: { value: _vm.car.opis },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
-                          }
-                          _vm.$set(_vm.car, "opis", $event.target.value)
-                        }
-                      }
-                    }),
-                    _vm._v(" "),
-                    _vm._m(5)
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "form-group row" }, [
-                  _c(
-                    "label",
-                    {
-                      staticClass: "col-sm-4 col-form-label text-md-right",
-                      attrs: { for: "kilometraza" }
-                    },
-                    [_vm._v("Kilometraza")]
-                  ),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-6" }, [
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.car.kilometraza,
-                          expression: "car.kilometraza"
-                        }
-                      ],
-                      staticClass: "form-control",
-                      attrs: {
-                        id: "kilometraza",
-                        type: "number",
-                        name: "kilometraza",
-                        required: "",
-                        autofocus: ""
-                      },
-                      domProps: { value: _vm.car.kilometraza },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
-                          }
-                          _vm.$set(_vm.car, "kilometraza", $event.target.value)
-                        }
-                      }
-                    }),
-                    _vm._v(" "),
-                    _vm._m(6)
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "form-group row" }, [
-                  _c(
-                    "label",
-                    {
-                      staticClass: "col-sm-4 col-form-label text-md-right",
-                      attrs: { for: "slika" }
-                    },
-                    [_vm._v("Slika")]
-                  ),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-6" }, [
-                    !_vm.image
-                      ? _c("div", [
-                          _c("h2", [_vm._v("Select an image")]),
-                          _vm._v(" "),
-                          _c("input", {
-                            attrs: { type: "file" },
-                            on: { change: _vm.onFileChange }
-                          })
-                        ])
-                      : _c("div", [
-                          _c("img", {
-                            attrs: { src: _vm.image, width: "100" }
-                          }),
-                          _vm._v(" "),
-                          _c("button", { on: { click: _vm.removeImage } }, [
-                            _vm._v("Remove image")
+                    _c("div", { staticClass: "col-md-6" }, [
+                      !_vm.image
+                        ? _c("div", [
+                            _c("h2", [_vm._v("Izaberi sliku")]),
+                            _vm._v(" "),
+                            _c("input", {
+                              attrs: { type: "file" },
+                              on: { change: _vm.onFileChange }
+                            })
                           ])
-                        ])
-                  ])
-                ]),
-                _vm._v(" "),
-                _vm._m(7)
-              ]
-            )
-          ])
+                        : _c("div", [
+                            _c("img", {
+                              attrs: { src: _vm.image, width: "100" }
+                            }),
+                            _vm._v(" "),
+                            _c("button", { on: { click: _vm.removeImage } }, [
+                              _vm._v("Skloni sliku")
+                            ])
+                          ])
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _vm._m(6)
+                ]
+              )
+            ],
+            1
+          )
         ])
       ],
       1
@@ -54739,16 +55009,6 @@ var render = function() {
   ])
 }
 var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "row" }, [
-      _c("div", { staticClass: "col-md-12" }, [
-        _c("h2", [_vm._v("Add new car")])
-      ])
-    ])
-  },
   function() {
     var _vm = this
     var _h = _vm.$createElement
@@ -54820,7 +55080,7 @@ var staticRenderFns = [
           { staticClass: "btn btn-primary", attrs: { type: "submit" } },
           [
             _vm._v(
-              "\n                                Napravi Auto\n                            "
+              "\n                                Azuriraj Auto\n                            "
             )
           ]
         )
@@ -55044,6 +55304,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     name: 'Logout',
@@ -55075,7 +55344,17 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("h1", [_vm._v(_vm._s(_vm.message))])
+  return _c("section", [
+    _c("div", { staticClass: "container" }, [
+      _c("div", { staticClass: "row" }, [
+        _c(
+          "div",
+          { staticClass: "col-md-12", staticStyle: { "text-align": "center" } },
+          [_c("h1", [_vm._v(_vm._s(_vm.message))])]
+        )
+      ])
+    ])
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -55231,6 +55510,12 @@ if (false) {
     require("vue-hot-reload-api")      .rerender("data-v-029634c1", module.exports)
   }
 }
+
+/***/ }),
+/* 115 */
+/***/ (function(module, exports, __webpack_require__) {
+
+!function(e,t){ true?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.VuejsPaginate=t():e.VuejsPaginate=t()}(this,function(){return function(e){function t(s){if(n[s])return n[s].exports;var a=n[s]={exports:{},id:s,loaded:!1};return e[s].call(a.exports,a,a.exports,t),a.loaded=!0,a.exports}var n={};return t.m=e,t.c=n,t.p="",t(0)}([function(e,t,n){"use strict";function s(e){return e&&e.__esModule?e:{default:e}}var a=n(1),i=s(a);e.exports=i.default},function(e,t,n){n(2);var s=n(6)(n(7),n(8),"data-v-82963a40",null);e.exports=s.exports},function(e,t,n){var s=n(3);"string"==typeof s&&(s=[[e.id,s,""]]);n(5)(s,{});s.locals&&(e.exports=s.locals)},function(e,t,n){t=e.exports=n(4)(),t.push([e.id,"a[data-v-82963a40]{cursor:pointer}",""])},function(e,t){e.exports=function(){var e=[];return e.toString=function(){for(var e=[],t=0;t<this.length;t++){var n=this[t];n[2]?e.push("@media "+n[2]+"{"+n[1]+"}"):e.push(n[1])}return e.join("")},e.i=function(t,n){"string"==typeof t&&(t=[[null,t,""]]);for(var s={},a=0;a<this.length;a++){var i=this[a][0];"number"==typeof i&&(s[i]=!0)}for(a=0;a<t.length;a++){var r=t[a];"number"==typeof r[0]&&s[r[0]]||(n&&!r[2]?r[2]=n:n&&(r[2]="("+r[2]+") and ("+n+")"),e.push(r))}},e}},function(e,t,n){function s(e,t){for(var n=0;n<e.length;n++){var s=e[n],a=d[s.id];if(a){a.refs++;for(var i=0;i<a.parts.length;i++)a.parts[i](s.parts[i]);for(;i<s.parts.length;i++)a.parts.push(l(s.parts[i],t))}else{for(var r=[],i=0;i<s.parts.length;i++)r.push(l(s.parts[i],t));d[s.id]={id:s.id,refs:1,parts:r}}}}function a(e){for(var t=[],n={},s=0;s<e.length;s++){var a=e[s],i=a[0],r=a[1],o=a[2],l=a[3],u={css:r,media:o,sourceMap:l};n[i]?n[i].parts.push(u):t.push(n[i]={id:i,parts:[u]})}return t}function i(e,t){var n=g(),s=C[C.length-1];if("top"===e.insertAt)s?s.nextSibling?n.insertBefore(t,s.nextSibling):n.appendChild(t):n.insertBefore(t,n.firstChild),C.push(t);else{if("bottom"!==e.insertAt)throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");n.appendChild(t)}}function r(e){e.parentNode.removeChild(e);var t=C.indexOf(e);t>=0&&C.splice(t,1)}function o(e){var t=document.createElement("style");return t.type="text/css",i(e,t),t}function l(e,t){var n,s,a;if(t.singleton){var i=v++;n=h||(h=o(t)),s=u.bind(null,n,i,!1),a=u.bind(null,n,i,!0)}else n=o(t),s=c.bind(null,n),a=function(){r(n)};return s(e),function(t){if(t){if(t.css===e.css&&t.media===e.media&&t.sourceMap===e.sourceMap)return;s(e=t)}else a()}}function u(e,t,n,s){var a=n?"":s.css;if(e.styleSheet)e.styleSheet.cssText=b(t,a);else{var i=document.createTextNode(a),r=e.childNodes;r[t]&&e.removeChild(r[t]),r.length?e.insertBefore(i,r[t]):e.appendChild(i)}}function c(e,t){var n=t.css,s=t.media,a=t.sourceMap;if(s&&e.setAttribute("media",s),a&&(n+="\n/*# sourceURL="+a.sources[0]+" */",n+="\n/*# sourceMappingURL=data:application/json;base64,"+btoa(unescape(encodeURIComponent(JSON.stringify(a))))+" */"),e.styleSheet)e.styleSheet.cssText=n;else{for(;e.firstChild;)e.removeChild(e.firstChild);e.appendChild(document.createTextNode(n))}}var d={},p=function(e){var t;return function(){return"undefined"==typeof t&&(t=e.apply(this,arguments)),t}},f=p(function(){return/msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase())}),g=p(function(){return document.head||document.getElementsByTagName("head")[0]}),h=null,v=0,C=[];e.exports=function(e,t){t=t||{},"undefined"==typeof t.singleton&&(t.singleton=f()),"undefined"==typeof t.insertAt&&(t.insertAt="bottom");var n=a(e);return s(n,t),function(e){for(var i=[],r=0;r<n.length;r++){var o=n[r],l=d[o.id];l.refs--,i.push(l)}if(e){var u=a(e);s(u,t)}for(var r=0;r<i.length;r++){var l=i[r];if(0===l.refs){for(var c=0;c<l.parts.length;c++)l.parts[c]();delete d[l.id]}}}};var b=function(){var e=[];return function(t,n){return e[t]=n,e.filter(Boolean).join("\n")}}()},function(e,t){e.exports=function(e,t,n,s){var a,i=e=e||{},r=typeof e.default;"object"!==r&&"function"!==r||(a=e,i=e.default);var o="function"==typeof i?i.options:i;if(t&&(o.render=t.render,o.staticRenderFns=t.staticRenderFns),n&&(o._scopeId=n),s){var l=o.computed||(o.computed={});Object.keys(s).forEach(function(e){var t=s[e];l[e]=function(){return t}})}return{esModule:a,exports:i,options:o}}},function(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default={props:{value:{type:Number,default:1},pageCount:{type:Number,required:!0},forcePage:{type:Number},clickHandler:{type:Function,default:function(){}},pageRange:{type:Number,default:3},marginPages:{type:Number,default:1},prevText:{type:String,default:"Prev"},nextText:{type:String,default:"Next"},breakViewText:{type:String,default:"…"},containerClass:{type:String},pageClass:{type:String},pageLinkClass:{type:String},prevClass:{type:String},prevLinkClass:{type:String},nextClass:{type:String},nextLinkClass:{type:String},breakViewClass:{type:String},breakViewLinkClass:{type:String},activeClass:{type:String,default:"active"},disabledClass:{type:String,default:"disabled"},noLiSurround:{type:Boolean,default:!1},firstLastButton:{type:Boolean,default:!1},firstButtonText:{type:String,default:"First"},lastButtonText:{type:String,default:"Last"},hidePrevNext:{type:Boolean,default:!1}},beforeUpdate:function(){void 0!==this.forcePage&&this.forcePage!==this.selected&&(this.selected=this.forcePage)},computed:{selected:function(){return this.value},pages:function(){var e=this,t={};if(this.pageCount<=this.pageRange)for(var n=0;n<this.pageCount;n++){var s={index:n,content:n+1,selected:n===this.selected-1};t[n]=s}else{for(var a=Math.floor(this.pageRange/2),i=function(n){var s={index:n,content:n+1,selected:n===e.selected-1};t[n]=s},r=function(e){var n={disabled:!0,breakView:!0};t[e]=n},o=0;o<this.marginPages;o++)i(o);var l=0;this.selected-a>0&&(l=this.selected-1-a);var u=l+this.pageRange-1;u>=this.pageCount&&(u=this.pageCount-1,l=u-this.pageRange+1);for(var c=l;c<=u&&c<=this.pageCount-1;c++)i(c);l>this.marginPages&&r(l-1),u+1<this.pageCount-this.marginPages&&r(u+1);for(var d=this.pageCount-1;d>=this.pageCount-this.marginPages;d--)i(d)}return t}},methods:{handlePageSelected:function(e){this.selected!==e&&(this.$emit("input",e),this.clickHandler(e))},prevPage:function(){this.selected<=1||(this.$emit("input",this.selected-1),this.clickHandler(this.selected-1))},nextPage:function(){this.selected>=this.pageCount||(this.$emit("input",this.selected+1),this.clickHandler(this.selected+1))},firstPageSelected:function(){return 1===this.selected},lastPageSelected:function(){return this.selected===this.pageCount||0===this.pageCount},selectFirstPage:function(){this.selected<=1||(this.$emit("input",1),this.clickHandler(1))},selectLastPage:function(){this.selected>=this.pageCount||(this.$emit("input",this.pageCount),this.clickHandler(this.pageCount))}}}},function(e,t){e.exports={render:function(){var e=this,t=e.$createElement,n=e._self._c||t;return e.noLiSurround?n("div",{class:e.containerClass},[e.firstLastButton?n("a",{class:[e.pageLinkClass,e.firstPageSelected()?e.disabledClass:""],attrs:{tabindex:"0"},domProps:{innerHTML:e._s(e.firstButtonText)},on:{click:function(t){e.selectFirstPage()},keyup:function(t){return"button"in t||!e._k(t.keyCode,"enter",13)?void e.selectFirstPage():null}}}):e._e(),e._v(" "),e.firstPageSelected()&&e.hidePrevNext?e._e():n("a",{class:[e.prevLinkClass,e.firstPageSelected()?e.disabledClass:""],attrs:{tabindex:"0"},domProps:{innerHTML:e._s(e.prevText)},on:{click:function(t){e.prevPage()},keyup:function(t){return"button"in t||!e._k(t.keyCode,"enter",13)?void e.prevPage():null}}}),e._v(" "),e._l(e.pages,function(t){return[t.breakView?n("a",{class:[e.pageLinkClass,e.breakViewLinkClass,t.disabled?e.disabledClass:""],attrs:{tabindex:"0"}},[e._t("breakViewContent",[e._v(e._s(e.breakViewText))])],2):t.disabled?n("a",{class:[e.pageLinkClass,t.selected?e.activeClass:"",e.disabledClass],attrs:{tabindex:"0"}},[e._v(e._s(t.content))]):n("a",{class:[e.pageLinkClass,t.selected?e.activeClass:""],attrs:{tabindex:"0"},on:{click:function(n){e.handlePageSelected(t.index+1)},keyup:function(n){return"button"in n||!e._k(n.keyCode,"enter",13)?void e.handlePageSelected(t.index+1):null}}},[e._v(e._s(t.content))])]}),e._v(" "),e.lastPageSelected()&&e.hidePrevNext?e._e():n("a",{class:[e.nextLinkClass,e.lastPageSelected()?e.disabledClass:""],attrs:{tabindex:"0"},domProps:{innerHTML:e._s(e.nextText)},on:{click:function(t){e.nextPage()},keyup:function(t){return"button"in t||!e._k(t.keyCode,"enter",13)?void e.nextPage():null}}}),e._v(" "),e.firstLastButton?n("a",{class:[e.pageLinkClass,e.lastPageSelected()?e.disabledClass:""],attrs:{tabindex:"0"},domProps:{innerHTML:e._s(e.lastButtonText)},on:{click:function(t){e.selectLastPage()},keyup:function(t){return"button"in t||!e._k(t.keyCode,"enter",13)?void e.selectLastPage():null}}}):e._e()],2):n("ul",{class:e.containerClass},[e.firstLastButton?n("li",{class:[e.pageClass,e.firstPageSelected()?e.disabledClass:""]},[n("a",{class:e.pageLinkClass,attrs:{tabindex:e.firstPageSelected()?-1:0},domProps:{innerHTML:e._s(e.firstButtonText)},on:{click:function(t){e.selectFirstPage()},keyup:function(t){return"button"in t||!e._k(t.keyCode,"enter",13)?void e.selectFirstPage():null}}})]):e._e(),e._v(" "),e.firstPageSelected()&&e.hidePrevNext?e._e():n("li",{class:[e.prevClass,e.firstPageSelected()?e.disabledClass:""]},[n("a",{class:e.prevLinkClass,attrs:{tabindex:e.firstPageSelected()?-1:0},domProps:{innerHTML:e._s(e.prevText)},on:{click:function(t){e.prevPage()},keyup:function(t){return"button"in t||!e._k(t.keyCode,"enter",13)?void e.prevPage():null}}})]),e._v(" "),e._l(e.pages,function(t){return n("li",{class:[e.pageClass,t.selected?e.activeClass:"",t.disabled?e.disabledClass:"",t.breakView?e.breakViewClass:""]},[t.breakView?n("a",{class:[e.pageLinkClass,e.breakViewLinkClass],attrs:{tabindex:"0"}},[e._t("breakViewContent",[e._v(e._s(e.breakViewText))])],2):t.disabled?n("a",{class:e.pageLinkClass,attrs:{tabindex:"0"}},[e._v(e._s(t.content))]):n("a",{class:e.pageLinkClass,attrs:{tabindex:"0"},on:{click:function(n){e.handlePageSelected(t.index+1)},keyup:function(n){return"button"in n||!e._k(n.keyCode,"enter",13)?void e.handlePageSelected(t.index+1):null}}},[e._v(e._s(t.content))])])}),e._v(" "),e.lastPageSelected()&&e.hidePrevNext?e._e():n("li",{class:[e.nextClass,e.lastPageSelected()?e.disabledClass:""]},[n("a",{class:e.nextLinkClass,attrs:{tabindex:e.lastPageSelected()?-1:0},domProps:{innerHTML:e._s(e.nextText)},on:{click:function(t){e.nextPage()},keyup:function(t){return"button"in t||!e._k(t.keyCode,"enter",13)?void e.nextPage():null}}})]),e._v(" "),e.firstLastButton?n("li",{class:[e.pageClass,e.lastPageSelected()?e.disabledClass:""]},[n("a",{class:e.pageLinkClass,attrs:{tabindex:e.lastPageSelected()?-1:0},domProps:{innerHTML:e._s(e.lastButtonText)},on:{click:function(t){e.selectLastPage()},keyup:function(t){return"button"in t||!e._k(t.keyCode,"enter",13)?void e.selectLastPage():null}}})]):e._e()],2)},staticRenderFns:[]}}])});
 
 /***/ })
 /******/ ]);
